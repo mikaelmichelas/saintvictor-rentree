@@ -1,0 +1,330 @@
+<title>Prérentrée 31 août – Ordre du jour</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root {
+  --accent: #1e40af;
+  --accent-light: #3b82f6;
+  --bg-light: #f8fafc;
+  --border: #e2e8f0;
+  --text-dark: #1e293b;
+  --text-muted: #64748b;
+  --warning: #dc2626;
+  --success: #16a34a;
+  --info: #0284c7;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  line-height: 1.6;
+  color: var(--text-dark);
+  background: linear-gradient(135deg, var(--bg-light) 0%, #ffffff 100%);
+  padding: 20px;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--border);
+}
+
+h1 {
+  font-size: 2.2em;
+  color: var(--accent);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.subtitle {
+  font-size: 1.1em;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  padding: 20px 0;
+}
+
+/* Single activity */
+.time-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.time-label {
+  flex: 0 0 90px;
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 0.95em;
+  padding-top: 20px;
+  text-align: right;
+}
+
+.activities-container {
+  flex: 1;
+  display: flex;
+  gap: 20px;
+}
+
+.activity {
+  flex: 1;
+  background: white;
+  border-left: 4px solid var(--accent-light);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: all 0.2s ease;
+}
+
+.activity:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.activity.pleniere { border-left-color: var(--info); }
+.activity.concertation { border-left-color: var(--success); }
+.activity.special { border-left-color: var(--warning); }
+.activity.atelier { border-left-color: #8b5cf6; }
+
+.activity h3 {
+  font-size: 1.15em;
+  margin-bottom: 8px;
+  color: var(--text-dark);
+}
+
+.activity p {
+  color: var(--text-muted);
+  font-size: 0.95em;
+  margin: 6px 0;
+}
+
+.activity ul {
+  margin-left: 20px;
+  margin-top: 10px;
+  color: var(--text-muted);
+  font-size: 0.95em;
+}
+
+.activity ul li {
+  margin: 4px 0;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75em;
+  font-weight: 600;
+  margin-top: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge.pleniere { background: #dbeafe; color: var(--info); }
+.badge.concertation { background: #dcfce7; color: var(--success); }
+.badge.special { background: #fee2e2; color: var(--warning); }
+.badge.atelier { background: #ede9fe; color: #8b5cf6; }
+
+.separator {
+  text-align: center;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.9em;
+  margin: 0 20px;
+}
+
+.info-box {
+  background: #eff6ff;
+  border-left: 4px solid var(--info);
+  padding: 16px;
+  border-radius: 6px;
+  margin-top: 30px;
+  font-size: 0.95em;
+  color: var(--text-dark);
+}
+
+.info-box strong {
+  display: block;
+  color: var(--info);
+  margin-bottom: 6px;
+}
+
+footer {
+  text-align: center;
+  margin-top: 50px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+  .activities-container {
+    flex-direction: column;
+  }
+  .time-label {
+    flex: 0 0 auto;
+    padding-top: 0;
+    margin-bottom: 10px;
+    text-align: left;
+  }
+  .time-row {
+    flex-direction: column;
+  }
+  .separator {
+    display: none;
+  }
+  h1 { font-size: 1.8em; }
+}
+</style>
+
+<div class="container">
+  <header>
+    <h1>📅 Prérentrée – Lundi 31 août</h1>
+    <p class="subtitle">Ordre du jour – Personnels École, Collège et Lycée</p>
+  </header>
+
+  <div class="timeline">
+    
+    <!-- 08h30-09h00 -->
+    <div class="time-row">
+      <div class="time-label">08h30-09h00</div>
+      <div class="activities-container">
+        <div class="activity special">
+          <h3>☕ Accueil café commun</h3>
+          <p><strong>Lieu :</strong> Préau du lycée</p>
+          <p>Tous les personnels (Ecole, Collège, Lycée)</p>
+          <span class="badge special">Commun</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 09h00-11h00 -->
+    <div class="time-row">
+      <div class="time-label">09h00-11h00</div>
+      <div class="activities-container">
+        <div class="activity pleniere">
+          <h3>📢 Accueil plénier</h3>
+          <p><strong>Lieu :</strong> Salle Pierre Vigne</p>
+          <ul>
+            <li>Accueil par l'équipe de direction</li>
+            <li>Informations clés de la rentrée</li>
+            <li>Déroulé de la rentrée des élèves</li>
+            <li>Calendriers (établissement, suivi de scolarité)</li>
+            <li>Rappels spécifiques et vigilances</li>
+            <li>Ressources utiles</li>
+          </ul>
+          <span class="badge pleniere">Plénier</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11h00-11h30 -->
+    <div class="time-row">
+      <div class="time-label">11h00-11h30</div>
+      <div class="activities-container">
+        <div class="activity special">
+          <h3>📸 Séance photo</h3>
+          <p><strong>Lieu :</strong> La chapelle</p>
+          <ul>
+            <li>Photo de groupe (ensemble de la communauté)</li>
+            <li>Photos individuelles</li>
+          </ul>
+          <span class="badge special">Tout le monde</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11h30-12h00 / 11h30-13h00 EN PARALLÈLE -->
+    <div class="time-row">
+      <div class="time-label">11h30<br>↓<br>13h00</div>
+      <div class="activities-container">
+        <div class="activity concertation">
+          <h3>👥 Réunion équipe intégration 6èmes</h3>
+          <p><strong>Horaire :</strong> 11h30-12h00</p>
+          <p><strong>Lieu :</strong> Salle Pierre Vigne</p>
+          <p>Pour les personnels sollicités pour la journée d'intégration</p>
+          <p style="font-size: 0.9em; color: #0284c7; margin-top: 10px;">Puis rejoindra le repas à 12h00</p>
+          <span class="badge concertation">Sélectif</span>
+        </div>
+        <div class="activity special">
+          <h3>🍽️ Repas au self</h3>
+          <p><strong>Horaire :</strong> 11h30-13h00</p>
+          <p><strong>Lieu :</strong> Self</p>
+          <p><strong>⚠️ Inscription impérative avant vendredi 28 août</strong></p>
+          <p><a href="https://forms.cloud.microsoft/e/V8i74muxPj" style="color: #dc2626; font-weight: 600; text-decoration: none;">→ Remplir le formulaire d'inscription</a></p>
+          <span class="badge special">Sur inscription</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 13h00-14h30 -->
+    <div class="time-row">
+      <div class="time-label">13h00-14h30</div>
+      <div class="activities-container">
+        <div class="activity concertation">
+          <h3>🎯 Concertation équipes matière</h3>
+          <p><strong>Lieu :</strong> Salles réservées (laboratoires, salles dédiées)</p>
+          <ul>
+            <li>Progressions pédagogiques</li>
+            <li>Projets de l'année</li>
+            <li>Évaluations et calendrier</li>
+          </ul>
+          <span class="badge concertation">Par discipline</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 14h30-16h00 PARALLÈLE -->
+    <div class="time-row">
+      <div class="time-label">14h30-16h00</div>
+      <div class="activities-container">
+        <div class="activity atelier">
+          <h3>💻 Atelier informatique</h3>
+          <p><strong>Lieu :</strong> Salle informatique</p>
+          <p><strong>Animateur :</strong> Joris Barrat</p>
+          <ul>
+            <li>Assistance et formation École Directe</li>
+            <li>Réseau pédagogique</li>
+            <li>Outils numériques</li>
+          </ul>
+          <span class="badge atelier">Formation</span>
+        </div>
+        <div class="separator">OU</div>
+        <div class="activity concertation">
+          <h3>🗣️ Réunion PP et Responsables de Niveau</h3>
+          <p><strong>Lieu :</strong> À définir</p>
+          <p><strong>Animé par :</strong> Les Responsables de Niveau</p>
+          <ul>
+            <li>Enjeux et temps forts de l'année</li>
+            <li>Préparation rentrée des élèves</li>
+            <li>Préparation réunion de rentrée parents</li>
+          </ul>
+          <span class="badge concertation">PP & RN</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="info-box">
+    <strong>🎯 À retenir</strong>
+    14h30-16h00 : deux ateliers en parallèle selon votre rôle — atelier informatique OU réunion PP/RN.
+  </div>
+
+  <footer>
+    Lycée Saint Victor – 31 août 2026
+  </footer>
+</div>
