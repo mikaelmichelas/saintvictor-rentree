@@ -43,6 +43,37 @@
         .header p {
             font-size: 1.1em;
             opacity: 0.95;
+            margin-bottom: 20px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .header-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #1B4965;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .header-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
         }
 
         .controls {
@@ -402,6 +433,14 @@
         <div class="header">
             <h1>📅 Planning des Évaluations</h1>
             <p>Lycée Saint Victor – 2026/2027</p>
+            <div class="header-buttons">
+                <a href="./PE.pdf" class="header-btn" target="_blank" rel="noopener noreferrer">
+                    📋 Protocole Évaluation
+                </a>
+                <a href="./affiche_PR.pdf" class="header-btn" target="_blank" rel="noopener noreferrer">
+                    🔄 Protocole Rattrapage
+                </a>
+            </div>
         </div>
 
         <div class="controls">
