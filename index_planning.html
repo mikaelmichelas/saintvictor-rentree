@@ -387,6 +387,75 @@
             font-size: 1.1em;
         }
 
+        .month-group {
+            margin-bottom: 15px;
+        }
+
+        .month-header {
+            background: #f0f4f8;
+            border-left: 4px solid #1B4965;
+            padding: 14px 16px;
+            margin-bottom: 0;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            color: #1B4965;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 6px 6px 0 0;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .month-header:hover {
+            background: #e8f0f8;
+        }
+
+        .month-header.collapsed {
+            border-radius: 6px;
+        }
+
+        .month-header .chevron {
+            display: inline-block;
+            transition: transform 0.3s ease;
+            font-size: 1.2em;
+        }
+
+        .month-header.collapsed .chevron {
+            transform: rotate(-90deg);
+        }
+
+        .month-content {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            margin-bottom: 10px;
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease, margin-bottom 0.3s ease;
+        }
+
+        .month-content.collapsed {
+            max-height: 0;
+            margin-bottom: 0;
+        }
+
+        .month-content .timeline-item {
+            margin-bottom: 20px;
+            margin-left: 50px;
+            padding-left: 20px;
+        }
+
+        .month-content .timeline-item:first-child {
+            margin-top: 15px;
+        }
+
+        .month-content .timeline-item:last-child {
+            margin-bottom: 15px;
+        }
+
         .footer {
             background: #f8f9fa;
             padding: 20px 30px;
@@ -514,20 +583,71 @@
         // Trier par date
         evaluations.sort((a, b) => new Date(a.fullDate) - new Date(b.fullDate));
 
+        const monthNames = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+
+        function getMonthKey(dateStr) {
+            const date = new Date(dateStr);
+            return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+        }
+
+        function getMonthLabel(dateStr) {
+            const date = new Date(dateStr);
+            return monthNames[date.getMonth()] + ' ' + date.getFullYear();
+        }
+
+        function groupByMonth(items) {
+            const groups = {};
+            items.forEach(item => {
+                const key = getMonthKey(item.fullDate);
+                if (!groups[key]) {
+                    groups[key] = [];
+                }
+                groups[key].push(item);
+            });
+            return groups;
+        }
+
         function renderTimeline() {
             const timeline = document.getElementById('timeline');
-            timeline.innerHTML = evaluations.map(eval => `
-                <div class="timeline-item ${eval.level}">
-                    <div class="date">${eval.date}</div>
-                    <div class="event-card">
-                        <span class="event-num ${eval.level === 'rappel' ? 'rappel' : ''}">${eval.num}</span>
-                        <div class="event-title">${eval.title}</div>
-                        <div class="event-level level-${eval.level}">
-                            ${eval.level === 'rappel' ? '🔄 Rattrapage tous niveaux' : eval.level === 'seconde' ? '2nde' : eval.level === 'premiere' ? '1ère' : 'Terminale'}
+            const grouped = groupByMonth(evaluations);
+            const sortedKeys = Object.keys(grouped).sort();
+
+            let html = '';
+            sortedKeys.forEach(monthKey => {
+                const items = grouped[monthKey];
+                const monthLabel = getMonthLabel(items[0].fullDate);
+
+                html += `
+                    <div class="month-group">
+                        <div class="month-header" onclick="toggleMonth(this)">
+                            <span>${monthLabel}</span>
+                            <span class="chevron">▼</span>
+                        </div>
+                        <div class="month-content">
+                            ${items.map(eval => `
+                                <div class="timeline-item ${eval.level}">
+                                    <div class="date">${eval.date}</div>
+                                    <div class="event-card">
+                                        <span class="event-num ${eval.level === 'rappel' ? 'rappel' : ''}">${eval.num}</span>
+                                        <div class="event-title">${eval.title}</div>
+                                        <div class="event-level level-${eval.level}">
+                                            ${eval.level === 'rappel' ? '🔄 Rattrapage tous niveaux' : eval.level === 'seconde' ? '2nde' : eval.level === 'premiere' ? '1ère' : 'Terminale'}
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            });
+
+            timeline.innerHTML = html;
+        }
+
+        function toggleMonth(header) {
+            const content = header.nextElementSibling;
+            header.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
         }
 
         function filterView(level) {
