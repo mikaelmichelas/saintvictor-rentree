@@ -40,6 +40,16 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
+        .header-school {
+            font-size: 0.9em;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: 0.95;
+            margin-bottom: 8px;
+            text-align: left;
+        }
+
         .header-top {
             display: flex;
             justify-content: space-between;
@@ -540,13 +550,14 @@
 </head>
 <body>
     <div class="header">
+        <div class="header-school">Lycée Saint Victor</div>
         <div class="header-top">
             <h1>📅 Planning des Évaluations</h1>
             <div class="header-buttons">
                 <a href="./PE.pdf" class="header-btn" target="_blank" rel="noopener noreferrer">
                     📋 Protocole Évaluation
                 </a>
-                <a href="./infographie_absence_eval.html" class="header-btn" target="_blank" rel="noopener noreferrer">
+                <a href="./affiche_PR.png" class="header-btn" target="_blank" rel="noopener noreferrer">
                     🔄 Protocole Rattrapage
                 </a>
             </div>
@@ -563,6 +574,9 @@
             </button>
             <button class="filter-btn terminale" onclick="filterView('terminale')">
                 <span class="color-dot dot-terminale"></span> Terminale
+            </button>
+            <button class="filter-btn all" onclick="toggleAllMonths()" id="toggleBtn" style="margin-left: auto;">
+                📂 Tout déplier
             </button>
         </div>
     </div>
@@ -652,17 +666,19 @@
             const sortedKeys = Object.keys(grouped).sort();
 
             let html = '';
-            sortedKeys.forEach(monthKey => {
+            sortedKeys.forEach((monthKey, idx) => {
                 const items = grouped[monthKey];
                 const monthLabel = getMonthLabel(items[0].fullDate);
+                const isFirst = idx === 0;
+                const collapsedClass = isFirst ? '' : 'collapsed';
 
                 html += `
                     <div class="month-group">
-                        <div class="month-header" onclick="toggleMonth(this)">
+                        <div class="month-header ${collapsedClass}" onclick="toggleMonth(this)">
                             <span>${monthLabel}</span>
                             <span class="chevron">▼</span>
                         </div>
-                        <div class="month-content">
+                        <div class="month-content ${collapsedClass}">
                             ${items.map(eval => `
                                 <div class="timeline-item ${eval.level}">
                                     <div class="date">${eval.date}</div>
@@ -683,10 +699,48 @@
             timeline.innerHTML = html;
         }
 
+        let allExpanded = false;
+
         function toggleMonth(header) {
             const content = header.nextElementSibling;
             header.classList.toggle('collapsed');
             content.classList.toggle('collapsed');
+        }
+
+        function toggleAllMonths() {
+            const headers = document.querySelectorAll('.month-header');
+            const contents = document.querySelectorAll('.month-content');
+            const btn = document.getElementById('toggleBtn');
+
+            allExpanded = !allExpanded;
+
+            headers.forEach(header => {
+                if (allExpanded) {
+                    header.classList.remove('collapsed');
+                } else {
+                    // Refermer tous sauf le premier
+                    if (header !== headers[0]) {
+                        header.classList.add('collapsed');
+                    } else {
+                        header.classList.remove('collapsed');
+                    }
+                }
+            });
+
+            contents.forEach((content, idx) => {
+                if (allExpanded) {
+                    content.classList.remove('collapsed');
+                } else {
+                    // Refermer tous sauf le premier
+                    if (idx !== 0) {
+                        content.classList.add('collapsed');
+                    } else {
+                        content.classList.remove('collapsed');
+                    }
+                }
+            });
+
+            btn.textContent = allExpanded ? '📂 Tout replier' : '📂 Tout déplier';
         }
 
         function filterView(level) {
