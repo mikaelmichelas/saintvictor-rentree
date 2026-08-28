@@ -22,84 +22,91 @@
             max-width: 1200px;
             margin: 0 auto;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: visible;
+            margin-top: 140px;
         }
 
         .header {
             background: linear-gradient(135deg, #1B4965 0%, #2d6a8f 100%);
             color: white;
-            padding: 40px 30px;
-            text-align: center;
+            padding: 12px 30px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
         }
 
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 1.4em;
+            margin: 0;
             font-weight: 700;
         }
 
         .header p {
-            font-size: 1.1em;
-            opacity: 0.95;
-            margin-bottom: 20px;
+            display: none;
         }
 
         .header-buttons {
             display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-end;
         }
 
         .header-btn {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
+            gap: 6px;
+            padding: 8px 16px;
             background: rgba(255, 255, 255, 0.95);
             color: #1B4965;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
-            font-size: 0.95em;
+            font-size: 0.8em;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            white-space: nowrap;
         }
 
         .header-btn:hover {
             background: white;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
         }
 
-        .controls {
+        .header-filters {
             display: flex;
-            gap: 15px;
+            gap: 8px;
             flex-wrap: wrap;
-            justify-content: center;
-            padding: 25px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e0e0e0;
         }
 
         .view-toggle {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         button {
-            padding: 10px 20px;
+            padding: 8px 14px;
             border: 2px solid #ddd;
             background: white;
-            border-radius: 6px;
+            border-radius: 5px;
             cursor: pointer;
             font-weight: 500;
             transition: all 0.3s ease;
-            font-size: 0.95em;
+            font-size: 0.85em;
         }
 
         button:hover {
@@ -116,12 +123,13 @@
         .filter-btn {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 10px 18px;
+            gap: 5px;
+            padding: 8px 13px;
+            font-size: 0.8em;
         }
 
         .filter-btn.all { border-color: #1B4965; }
-        .filter-btn.all.active { background: #1B4965; }
+        .filter-btn.all.active { background: #1B4965; color: white; }
 
         .filter-btn.seconde { border-color: #06D6A0; }
         .filter-btn.seconde.active { background: #06D6A0; color: white; }
@@ -133,16 +141,22 @@
         .filter-btn.terminale.active { background: #E63946; color: white; }
 
         .color-dot {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             display: inline-block;
+            flex-shrink: 0;
         }
 
         .dot-seconde { background: #06D6A0; }
         .dot-premiere { background: #F77F00; }
         .dot-terminale { background: #E63946; }
         .dot-rappel { background: #FFB703; }
+
+        .header .filter-btn .color-dot {
+            width: 9px;
+            height: 9px;
+        }
 
         .content {
             padding: 30px;
@@ -466,8 +480,43 @@
         }
 
         @media (max-width: 768px) {
+            .header {
+                padding: 10px 15px;
+            }
+
             .header h1 {
-                font-size: 1.8em;
+                font-size: 1.1em;
+            }
+
+            .header-top {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .header-buttons {
+                width: 100%;
+                gap: 8px;
+            }
+
+            .header-btn {
+                flex: 1;
+                padding: 6px 10px;
+                font-size: 0.7em;
+            }
+
+            .header-filters {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .filter-btn {
+                flex: 1;
+                justify-content: center;
+                padding: 6px 8px;
+            }
+
+            .container {
+                margin-top: 160px;
             }
 
             .timeline-item {
@@ -486,22 +535,13 @@
             .date {
                 font-size: 0.95em;
             }
-
-            .controls {
-                flex-direction: column;
-            }
-
-            button {
-                width: 100%;
-            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
+    <div class="header">
+        <div class="header-top">
             <h1>📅 Planning des Évaluations</h1>
-            <p>Lycée Saint Victor – 2026/2027</p>
             <div class="header-buttons">
                 <a href="./PE.pdf" class="header-btn" target="_blank" rel="noopener noreferrer">
                     📋 Protocole Évaluation
@@ -511,24 +551,23 @@
                 </a>
             </div>
         </div>
-
-        <div class="controls">
-            <div class="view-toggle">
-                <button class="filter-btn all active" onclick="filterView('all')">
-                    <span class="color-dot dot-rappel"></span> Tout voir
-                </button>
-                <button class="filter-btn seconde" onclick="filterView('seconde')">
-                    <span class="color-dot dot-seconde"></span> Seconde
-                </button>
-                <button class="filter-btn premiere" onclick="filterView('premiere')">
-                    <span class="color-dot dot-premiere"></span> Première
-                </button>
-                <button class="filter-btn terminale" onclick="filterView('terminale')">
-                    <span class="color-dot dot-terminale"></span> Terminale
-                </button>
-            </div>
+        <div class="header-filters">
+            <button class="filter-btn all active" onclick="filterView('all')">
+                <span class="color-dot dot-rappel"></span> Tout voir
+            </button>
+            <button class="filter-btn seconde" onclick="filterView('seconde')">
+                <span class="color-dot dot-seconde"></span> Seconde
+            </button>
+            <button class="filter-btn premiere" onclick="filterView('premiere')">
+                <span class="color-dot dot-premiere"></span> Première
+            </button>
+            <button class="filter-btn terminale" onclick="filterView('terminale')">
+                <span class="color-dot dot-terminale"></span> Terminale
+            </button>
         </div>
+    </div>
 
+    <div class="container">
         <div class="content">
             <div class="legend">
                 <div class="legend-item">
