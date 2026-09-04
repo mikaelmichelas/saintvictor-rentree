@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suivi télétravail — Mikael Michelas</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#0C447C;--blue-m:#185FA5;--blue-l:#E6F1FB;--blue-b:#B5D4F4;
+  --g9:#1a1a1a;--g7:#3d3d3a;--g5:#6b6b68;--g3:#c8c6bc;--g1:#f5f4f0;
+  --white:#fff;--red:#a32d2d;--red-bg:#fcebeb;--green:#1a6e3c;--green-bg:#e6f5ec;--r:8px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--g1);color:var(--g7);font-size:15px;line-height:1.5;padding:28px 20px 60px;min-height:100vh}
+h1{font-size:20px;font-weight:600;color:var(--blue);letter-spacing:-.3px}
+.sub{font-size:12px;color:var(--g5);margin-top:2px}
+header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--g3);padding-bottom:16px;margin-bottom:24px;max-width:860px;margin-left:auto;margin-right:auto}
+.yr{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--g5)}
+select{font-size:13px;padding:5px 10px;border:1px solid var(--g3);border-radius:6px;background:var(--white);color:var(--g7);cursor:pointer}
+.main{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.sc{background:var(--white);border:1px solid var(--g3);border-radius:var(--r);padding:16px}
+.sc.a{background:var(--blue-l);border-color:var(--blue-b)}
+.sc.g{background:var(--green-bg);border-color:#a3d4b8}
+.sl{font-size:11px;color:var(--g5);margin-bottom:4px}
+.sc.a .sl{color:var(--blue-m)}
+.sc.g .sl{color:var(--green)}
+.sv{font-size:26px;font-weight:700;color:var(--blue);letter-spacing:-.5px;line-height:1}
+.sc.g .sv{color:var(--green)}
+.ss{font-size:11px;color:var(--g5);margin-top:4px}
+
+/* Formulaires */
+.card{background:var(--white);border:1px solid var(--g3);border-radius:var(--r);padding:20px}
+.card h2{font-size:14px;font-weight:600;color:var(--g9);margin-bottom:16px}
+.card-tabs{display:flex;gap:2px;background:var(--g1);border:1px solid var(--g3);border-radius:7px;padding:3px;margin-bottom:16px;width:fit-content}
+.ctab{background:none;border:none;padding:5px 14px;border-radius:5px;font-size:12px;font-weight:500;color:var(--g5);cursor:pointer;transition:all .15s}
+.ctab.active{background:var(--white);color:var(--blue);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.frow{display:grid;grid-template-columns:160px 100px 1fr auto;gap:10px;align-items:end}
+.frow5{display:grid;grid-template-columns:160px 90px 90px 1fr auto;gap:10px;align-items:end}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11px;color:var(--g5)}
+input[type=date],input[type=number],input[type=text]{font-size:14px;padding:9px 11px;border:1px solid var(--g3);border-radius:6px;background:var(--white);color:var(--g7);width:100%;font-family:inherit}
+input:focus{outline:none;border-color:var(--blue-m);box-shadow:0 0 0 3px rgba(24,95,165,.12)}
+button{font-size:13px;font-weight:500;padding:9px 16px;border-radius:6px;cursor:pointer;border:1px solid var(--g3);font-family:inherit;transition:background .1s;white-space:nowrap}
+.bp{background:var(--blue);color:var(--white);border-color:var(--blue)}
+.bp:hover{background:var(--blue-m);border-color:var(--blue-m)}
+.bs{background:var(--white);color:var(--g7)}
+.bs:hover{background:var(--g1)}
+.bd{background:none;border:none;color:var(--red);font-size:12px;padding:3px 7px;cursor:pointer;border-radius:4px}
+.bd:hover{background:var(--red-bg)}
+.err{font-size:11px;color:var(--red);margin-top:6px;min-height:16px}
+
+/* Table historique */
+.tcard{background:var(--white);border:1px solid var(--g3);border-radius:var(--r);overflow:hidden}
+.th2{padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--g3)}
+.th2 h2{font-size:14px;font-weight:600;color:var(--g9)}
+.ebtns{display:flex;gap:8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;font-size:10px;font-weight:600;color:var(--g5);padding:9px 20px;background:var(--g1);border-bottom:1px solid var(--g3);letter-spacing:.3px}
+tbody tr{border-bottom:1px solid var(--g1);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#fafaf8}
+td{padding:10px 20px;vertical-align:middle}
+td.h{font-weight:600;color:var(--blue);font-variant-numeric:tabular-nums}
+td.h2{font-weight:600;color:var(--green);font-variant-numeric:tabular-nums}
+td.n{color:var(--g5);font-size:12px;max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+td.tag{font-size:11px}
+.tag-tt{background:var(--blue-l);color:var(--blue-m);padding:2px 7px;border-radius:10px;font-weight:500}
+.tag-dep{background:#fef3e2;color:#8a5800;padding:2px 7px;border-radius:10px;font-weight:500}
+.tag-sup{background:var(--green-bg);color:var(--green);padding:2px 7px;border-radius:10px;font-weight:500}
+.mg td{padding:6px 20px;font-size:10px;font-weight:600;color:var(--g5);background:var(--g1);letter-spacing:.3px;border-top:1px solid var(--g3)}
+.empty{padding:44px;text-align:center;color:var(--g5);font-size:13px}
+
+/* Onglets header */
+.tabs{display:flex;gap:2px;background:var(--g1);border:1px solid var(--g3);border-radius:8px;padding:3px}
+.tab{background:none;border:none;padding:6px 14px;border-radius:6px;font-size:13px;font-weight:500;color:var(--g5);cursor:pointer;transition:all .15s}
+.tab.active{background:var(--white);color:var(--blue);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.tab:hover:not(.active){color:var(--g7)}
+
+/* Toast */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--g9);color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:999}
+#toast.show{opacity:1}
+
+/* ---- BILAN ---- */
+.bilan-intro{background:var(--blue);border-radius:var(--r);padding:24px 28px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
+.bilan-label{font-size:10px;font-weight:600;color:rgba(255,255,255,.55);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
+.bilan-title{font-size:22px;font-weight:700;color:#fff;letter-spacing:-.3px;line-height:1.15}
+.bilan-desc{font-size:12px;color:rgba(255,255,255,.65);margin-top:6px;line-height:1.6}
+.bilan-kpis{display:flex;gap:0;border:1px solid rgba(255,255,255,.18);border-radius:8px;overflow:hidden}
+.bilan-kpi{padding:14px 20px;text-align:center;border-right:1px solid rgba(255,255,255,.15)}
+.bilan-kpi:last-child{border-right:none}
+.bilan-kpi.accent{background:rgba(255,255,255,.12)}
+.bk-val{font-size:24px;font-weight:700;color:#fff;line-height:1;letter-spacing:-.5px}
+.bk-unit{font-size:14px;font-weight:500;letter-spacing:0}
+.bk-label{font-size:10px;color:rgba(255,255,255,.6);margin-top:5px;white-space:nowrap}
+
+/* Compteur dynamique */
+.compteur{background:var(--white);border:2px solid var(--blue-b);border-radius:var(--r);padding:20px 24px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;overflow:hidden}
+.cpt-cell{padding:12px 16px;border-right:1px solid var(--g3);text-align:center}
+.cpt-cell:last-child{border-right:none}
+.cpt-label{font-size:10px;color:var(--g5);margin-bottom:6px;font-weight:500}
+.cpt-val{font-size:28px;font-weight:700;letter-spacing:-.5px;line-height:1}
+.cpt-val.blue{color:var(--blue)}
+.cpt-val.orange{color:#8a5800}
+.cpt-val.green{color:var(--green)}
+.cpt-val.red{color:var(--red)}
+.cpt-sub{font-size:11px;color:var(--g5);margin-top:4px}
+.progress-bar{background:var(--g1);border-radius:4px;height:6px;margin-top:10px;overflow:hidden;grid-column:1/-1}
+.progress-fill{height:100%;background:var(--blue);border-radius:4px;transition:width .4s}
+
+/* Sections bilan */
+.bsection{background:var(--white);border:1px solid var(--g3);border-radius:var(--r);overflow:hidden}
+.bsection.accent-section{border-color:var(--blue-b);background:var(--blue-l)}
+.bsection-header{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--g3)}
+.accent-section .bsection-header{border-bottom-color:var(--blue-b)}
+.bnum{width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bsection-header h2{font-size:14px;font-weight:600;color:var(--g9);margin:0}
+.btable{width:100%;border-collapse:collapse;font-size:13px}
+.btable thead th{text-align:left;font-size:10px;font-weight:600;color:var(--g5);padding:9px 20px;background:var(--g1);border-bottom:1px solid var(--g3);letter-spacing:.3px}
+.accent-section .btable thead th{background:rgba(255,255,255,.6)}
+.btable tbody tr{border-bottom:1px solid var(--g1)}
+.btable tbody tr:last-child{border-bottom:none}
+.btable td{padding:9px 20px;vertical-align:middle}
+.bv{font-weight:600;color:var(--blue);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bv.red{color:var(--red)}
+.bv.dyn{color:var(--blue)}
+.btotal td{background:var(--g1);font-weight:600;border-top:1px solid var(--g3);border-bottom:1px solid var(--g3)}
+.accent-section .btotal td{background:rgba(255,255,255,.5)}
+.bnote{font-size:11px;color:var(--g5);padding:10px 20px 14px;line-height:1.55;border-top:1px solid var(--g1)}
+.accent-section .bnote{border-top-color:var(--blue-b)}
+.bfooter{font-size:11px;color:var(--g5);text-align:center;padding:4px 0 8px}
+
+@media(max-width:640px){
+  .frow,.frow5{grid-template-columns:1fr 1fr}
+  .frow .field:nth-child(3),.frow5 .field:nth-child(4){grid-column:1/-1}
+  .frow button,.frow5 button{grid-column:1/-1}
+  .stats{grid-template-columns:1fr 1fr}
+  .compteur{grid-template-columns:1fr}
+  .cpt-cell{border-right:none;border-bottom:1px solid var(--g3)}
+  header{flex-direction:column;align-items:flex-start;gap:12px}
+  .bilan-intro{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Suivi télétravail</h1>
+    <p class="sub">Mikael Michelas — Lycée Saint Victor, Valence</p>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <nav class="tabs">
+      <button class="tab active" onclick="showTab('suivi',this)">Suivi</button>
+      <button class="tab" onclick="showTab('bilan',this)">Bilan contractuel</button>
+    </nav>
+    <div class="yr" id="yr-select">
+      <span>Année scolaire</span>
+      <select id="ys" onchange="render()"></select>
+    </div>
+  </div>
+</header>
+
+<!-- ===== ONGLET SUIVI ===== -->
+<div class="main" id="tab-suivi">
+
+  <div class="stats">
+    <div class="sc a">
+      <div class="sl">Télétravail cette année</div>
+      <div class="sv" id="s-total">0h</div>
+      <div class="ss" id="s-days">0 jour enregistré</div>
+    </div>
+    <div class="sc" style="border-color:#f5d9a0;background:#fef9ee">
+      <div class="sl" style="color:#8a5800">Dépassements</div>
+      <div class="sv" id="s-dep" style="color:#8a5800">0h</div>
+      <div class="ss" id="s-dep-n">soirées / prolongements</div>
+    </div>
+    <div class="sc g">
+      <div class="sl">Heures supplémentaires</div>
+      <div class="sv" id="s-sup">0h</div>
+      <div class="ss" id="s-sup-n">journées atypiques</div>
+    </div>
+    <div class="sc">
+      <div class="sl">Restant à faire (télétravail)</div>
+      <div class="sv" id="s-rest" style="color:var(--blue)">369h15</div>
+      <div class="ss" id="s-rest-sem">sur 41,5 semaines</div>
+    </div>
+  </div>
+
+  <!-- Formulaire avec onglets -->
+  <div class="card">
+    <div class="card-tabs">
+      <button class="ctab active" onclick="showForm('tt',this)">Télétravail</button>
+      <button class="ctab" onclick="showForm('dep',this)">Dépassement</button>
+      <button class="ctab" onclick="showForm('sup',this)">Heure supplémentaire</button>
+    </div>
+
+    <!-- Formulaire télétravail -->
+    <div id="form-tt">
+      <div class="frow">
+        <div class="field"><label for="tt-date">Date</label><input type="date" id="tt-date"></div>
+        <div class="field"><label for="tt-h">Heures</label><input type="number" id="tt-h" min="0.5" max="12" step="0.5" placeholder="ex. 4"></div>
+        <div class="field"><label for="tt-n">Note (optionnel)</label><input type="text" id="tt-n" placeholder="ex. préparation Parcoursup…"></div>
+        <button class="bp" onclick="addEntry('tt')">Ajouter</button>
+      </div>
+      <div class="err" id="err-tt"></div>
+    </div>
+
+    <!-- Formulaire dépassement -->
+    <div id="form-dep" style="display:none">
+      <p style="font-size:12px;color:var(--g5);margin-bottom:12px">Prolongement d'une journée habituelle (lundi/mardi/jeudi) au-delà de 17h — ex. conseil de classe, réunion tardive.</p>
+      <div class="frow5">
+        <div class="field"><label for="dep-date">Date</label><input type="date" id="dep-date"></div>
+        <div class="field"><label for="dep-fin">Fin réelle</label><input type="text" id="dep-fin" placeholder="ex. 19h30"></div>
+        <div class="field"><label for="dep-h">Heures dépassées</label><input type="number" id="dep-h" min="0.25" max="6" step="0.25" placeholder="ex. 2.5"></div>
+        <div class="field"><label for="dep-n">Motif</label><input type="text" id="dep-n" placeholder="ex. conseils de classe T1"></div>
+        <button class="bp" onclick="addEntry('dep')">Ajouter</button>
+      </div>
+      <div class="err" id="err-dep"></div>
+    </div>
+
+    <!-- Formulaire heure sup -->
+    <div id="form-sup" style="display:none">
+      <p style="font-size:12px;color:var(--g5);margin-bottom:12px">Journée ou plage atypique hors format habituel — samedi, journée pédagogique, mercredi entier, événement exceptionnel.</p>
+      <div class="frow5">
+        <div class="field"><label for="sup-date">Date</label><input type="date" id="sup-date"></div>
+        <div class="field"><label for="sup-debut">Début</label><input type="text" id="sup-debut" placeholder="ex. 08h00"></div>
+        <div class="field"><label for="sup-h">Heures direction</label><input type="number" id="sup-h" min="0.5" max="14" step="0.5" placeholder="ex. 6"></div>
+        <div class="field"><label for="sup-n">Motif</label><input type="text" id="sup-n" placeholder="ex. journée portes ouvertes"></div>
+        <button class="bp" onclick="addEntry('sup')">Ajouter</button>
+      </div>
+      <div class="err" id="err-sup"></div>
+    </div>
+  </div>
+
+  <!-- Historique -->
+  <div class="tcard">
+    <div class="th2">
+      <h2>Historique <span id="cnt" style="color:var(--g5);font-weight:400;font-size:12px"></span></h2>
+      <div class="ebtns">
+        <button class="bs" onclick="exportCSV()">Export CSV</button>
+        <button class="bs" onclick="exportPDF()">Export PDF</button>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>Date</th><th>Type</th><th>Heures</th><th>Note</th><th></th></tr></thead>
+      <tbody id="tb"></tbody>
+    </table>
+  </div>
+
+</div><!-- fin tab-suivi -->
+
+
+<!-- ===== ONGLET BILAN ===== -->
+<div class="main" id="tab-bilan" style="display:none">
+
+  <div class="bilan-intro">
+    <div class="bilan-intro-text">
+      <div class="bilan-label">Base conventionnelle</div>
+      <div class="bilan-title">Temps de travail contractuel</div>
+      <div class="bilan-desc">Contrat 75 % · Strate IV degré 15 · Ancienneté 2 935 pts<br>Convention collective CEPNL signée 2025</div>
+    </div>
+    <div class="bilan-kpis">
+      <div class="bilan-kpi">
+        <div class="bk-val">1 173<span class="bk-unit">h45</span></div>
+        <div class="bk-label">Quota annuel à 75 %</div>
+      </div>
+      <div class="bilan-kpi">
+        <div class="bk-val">41<span class="bk-unit">,5</span></div>
+        <div class="bk-label">Semaines travaillées</div>
+      </div>
+      <div class="bilan-kpi accent">
+        <div class="bk-val">28<span class="bk-unit">h17</span></div>
+        <div class="bk-label">Heures dues / semaine</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compteur dynamique -->
+  <div class="bsection accent-section">
+    <div class="bsection-header">
+      <span class="bnum">→</span>
+      <h2>Avancement en temps réel</h2>
+    </div>
+    <div style="padding:20px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        <div style="text-align:center;padding:14px;background:rgba(255,255,255,.6);border-radius:8px">
+          <div class="cpt-label">Quota télétravail annuel</div>
+          <div class="cpt-val blue" id="b-quota">369h15</div>
+          <div class="cpt-sub">à couvrir en télétravail</div>
+        </div>
+        <div style="text-align:center;padding:14px;background:rgba(255,255,255,.6);border-radius:8px">
+          <div class="cpt-label">Télétravail saisi + dépassements + supps</div>
+          <div class="cpt-val orange" id="b-fait">0h</div>
+          <div class="cpt-sub" id="b-fait-det">—</div>
+        </div>
+        <div style="text-align:center;padding:14px;background:rgba(255,255,255,.6);border-radius:8px">
+          <div class="cpt-label">Restant à couvrir</div>
+          <div class="cpt-val" id="b-reste" style="color:var(--blue)">369h15</div>
+          <div class="cpt-sub" id="b-reste-sem">≈ 8h54 / semaine</div>
+        </div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--g5);margin-bottom:5px">
+          <span>Progression</span><span id="b-pct">0 %</span>
+        </div>
+        <div style="background:var(--blue-b);border-radius:4px;height:8px;overflow:hidden">
+          <div id="b-bar" style="height:100%;background:var(--blue);border-radius:4px;width:0%;transition:width .5s"></div>
+        </div>
+      </div>
+    </div>
+    <p class="bnote">Se met à jour automatiquement à chaque saisie dans l'onglet Suivi. Le télétravail, les dépassements et les heures supplémentaires réduisent tous le quota restant.</p>
+  </div>
+
+  <!-- Bloc 1 -->
+  <div class="bsection">
+    <div class="bsection-header"><span class="bnum">1</span><h2>Quota annuel</h2></div>
+    <table class="btable">
+      <thead><tr><th>Élément</th><th>Calcul</th><th>Résultat</th></tr></thead>
+      <tbody>
+        <tr><td>Volume annuel conventionnel (100 %)</td><td>Convention CEPNL 2025</td><td class="bv">1 565 h</td></tr>
+        <tr><td>Quotité de travail</td><td>× 75 %</td><td class="bv">× 0,75</td></tr>
+        <tr class="btotal"><td colspan="2">Quota annuel à 75 %</td><td class="bv">1 173 h 45</td></tr>
+        <tr><td>Congés payés conventionnels (100 %)</td><td>36 jours ouvrables</td><td class="bv">36 j</td></tr>
+        <tr><td>Congés payés à 75 %</td><td>36 × 0,75</td><td class="bv">27 j ouvrables</td></tr>
+      </tbody>
+    </table>
+    <p class="bnote">Les CP couvrent intégralement toutes les périodes de fermeture et de congés. Pas de jours à poser librement en dehors.</p>
+  </div>
+
+  <!-- Bloc 2 -->
+  <div class="bsection">
+    <div class="bsection-header"><span class="bnum">2</span><h2>Semaines travaillées</h2></div>
+    <table class="btable">
+      <thead><tr><th>Période</th><th>Statut</th><th>Semaines</th></tr></thead>
+      <tbody>
+        <tr><td>Année civile</td><td>Total calendaire</td><td class="bv">52</td></tr>
+        <tr><td colspan="3" style="font-size:11px;color:var(--g5);padding:8px 20px;background:var(--g1)">Périodes non travaillées</td></tr>
+        <tr><td>Vacances de Noël</td><td>Fermeture obligatoire établissement</td><td class="bv red">− 2</td></tr>
+        <tr><td>Toussaint</td><td>2e semaine uniquement (1re travaillée)</td><td class="bv red">− 1</td></tr>
+        <tr><td>Hiver</td><td>2e semaine uniquement (1re travaillée)</td><td class="bv red">− 1</td></tr>
+        <tr><td>Printemps</td><td>2e semaine uniquement (1re travaillée)</td><td class="bv red">− 1</td></tr>
+        <tr><td>Été (veille 14 juillet → ~20 août)</td><td>Congés annuels</td><td class="bv red">− 5,5</td></tr>
+        <tr class="btotal"><td colspan="2">Semaines effectivement travaillées</td><td class="bv">41,5</td></tr>
+      </tbody>
+    </table>
+    <p class="bnote">1re semaine de chaque vacances scolaires (Toussaint, hiver, printemps) : présence direction assurée, comptée comme semaine travaillée.</p>
+  </div>
+
+  <!-- Bloc 3 -->
+  <div class="bsection">
+    <div class="bsection-header"><span class="bnum">3</span><h2>Décomposition d'une semaine type</h2></div>
+    <table class="btable">
+      <thead><tr><th>Jour</th><th>Amplitude / statut</th><th>Heures direction</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Lundi</strong></td><td>8h–17h · pause déj 1h · 2h cours (non direction)</td><td class="bv">6h</td></tr>
+        <tr><td><strong>Mardi</strong></td><td>8h–17h · pause déj 1h · 2h cours (non direction)</td><td class="bv">6h</td></tr>
+        <tr><td><strong>Mercredi</strong></td><td>Télétravail (variable)</td><td class="bv" style="color:var(--g5)">voir bloc 5</td></tr>
+        <tr><td><strong>Jeudi</strong></td><td>8h–17h · pause déj 1h · 2h cours (non direction)</td><td class="bv">6h</td></tr>
+        <tr><td><strong>Vendredi</strong></td><td>Télétravail (variable)</td><td class="bv" style="color:var(--g5)">voir bloc 5</td></tr>
+        <tr class="btotal"><td colspan="2">Présentiel lundi/mardi/jeudi × 41,5 semaines</td><td class="bv">747h</td></tr>
+      </tbody>
+    </table>
+    <p class="bnote">Les 2h de cours quotidiens sont comptabilisées dans le temps enseignant — statut distinct du temps direction OGEC.</p>
+  </div>
+
+  <!-- Bloc 4 -->
+  <div class="bsection">
+    <div class="bsection-header"><span class="bnum">4</span><h2>Heures identifiées hors semaine type</h2></div>
+    <table class="btable">
+      <thead><tr><th>Nature</th><th>Détail</th><th>Total</th></tr></thead>
+      <tbody>
+        <tr><td>Samedis travaillés</td><td>2 samedis dans l'année</td><td class="bv">16h</td></tr>
+        <tr><td>Vendredis travaillés (ponctuel)</td><td>3 vendredis identifiés</td><td class="bv">22h</td></tr>
+        <tr><td>Mercredis sur place</td><td>4 mercredis en présentiel</td><td class="bv">12h</td></tr>
+        <tr><td>Soirées prolongées</td><td>3 soirées × 2h30 (dépassement après 17h)</td><td class="bv">7,5h</td></tr>
+        <tr class="btotal"><td colspan="2">Sous-total heures hors semaine type</td><td class="bv">57,5h</td></tr>
+      </tbody>
+    </table>
+    <p class="bnote">Ces heures sont incluses dans le calcul de base. Les dépassements et heures supplémentaires saisis dans l'onglet Suivi viennent s'y ajouter et réduisent d'autant le quota télétravail restant.</p>
+  </div>
+
+  <!-- Bloc 5 : dynamique -->
+  <div class="bsection accent-section">
+    <div class="bsection-header"><span class="bnum">5</span><h2>Télétravail à couvrir — détail du calcul</h2></div>
+    <table class="btable">
+      <thead><tr><th>Élément</th><th>Calcul</th><th>Résultat</th></tr></thead>
+      <tbody>
+        <tr><td>Quota annuel 75 %</td><td></td><td class="bv">1 173h45</td></tr>
+        <tr><td>Présentiel lundi/mardi/jeudi</td><td>6h × 3j × 41,5 sem.</td><td class="bv red">− 747h</td></tr>
+        <tr><td>Heures hors semaine type (fixes)</td><td>samedis, vendredis, mercredis, soirées</td><td class="bv red">− 57,5h</td></tr>
+        <tr><td>Télétravail saisi</td><td>onglet Suivi</td><td class="bv red" id="b5-tt">− 0h</td></tr>
+        <tr><td>Dépassements saisis</td><td>soirées prolongées saisies</td><td class="bv red" id="b5-dep">− 0h</td></tr>
+        <tr><td>Heures supplémentaires saisies</td><td>journées atypiques saisies</td><td class="bv red" id="b5-sup">− 0h</td></tr>
+        <tr class="btotal"><td colspan="2"><strong>Télétravail restant à couvrir</strong></td><td class="bv" id="b5-reste">369h15</td></tr>
+        <tr><td colspan="2">Réparti sur les semaines restantes</td><td class="bv" id="b5-sem">≈ 8h54 / sem.</td></tr>
+        <tr><td colspan="2">Exemple : mercredi + vendredi à parts égales</td><td class="bv" id="b5-ex">≈ 4h27 / jour</td></tr>
+      </tbody>
+    </table>
+    <p class="bnote">Le restant se met à jour à chaque saisie. Les heures déjà connues (bloc 4) sont déduites dans la base de calcul — seules les nouvelles saisies apparaissent ici.</p>
+  </div>
+
+  <div class="bfooter">
+    Convention Collective CEPNL (signée 2025) · 1 565 h annuelles · 36 j ouvrables CP · Contrat 75 % · Strate IV degré 15
+  </div>
+
+</div><!-- fin tab-bilan -->
+
+<div id="toast"></div>
+
+<script>
+const MFR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const DFR=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+const KEY='teletravail_sv_v2';
+
+// Constantes contractuelles
+const QUOTA_TOTAL = 1173.75;   // heures annuelles à 75%
+const BASE_PRESENTIEL = 747;   // lun/mar/jeu
+const BASE_HORS = 57.5;        // samedis, vendredis, mercredis, soirées connues
+const QUOTA_TT = QUOTA_TOTAL - BASE_PRESENTIEL - BASE_HORS; // 369.25h
+const SEMAINES_ANNEE = 41.5;   // total annuel (référence fixe pour la base de calcul)
+
+// Date de fin d'année scolaire (dernier jour travaillé)
+const FIN_ANNEE = new Date('2027-08-31T12:00:00'); // 31 août — à mettre à jour chaque année
+
+// Périodes non travaillées (semaines off)
+// À mettre à jour chaque année scolaire selon calendrier zone B
+const PERIODES_OFF = [
+  // Toussaint 2026 — 2e semaine seulement
+  ['2026-11-02','2026-11-08'],
+  // Noël 2026
+  ['2026-12-21','2027-01-03'],
+  // Hiver 2027 — 2e semaine seulement
+  ['2027-02-22','2027-03-07'],
+  // Printemps 2027 — 2e semaine seulement
+  ['2027-04-19','2027-04-25'],
+  // Été 2027 : veille 14 juillet → 19 août
+  ['2027-07-13','2027-08-19'],
+];
+
+// Calcule le nombre de semaines travaillées restantes
+// — part du 1er septembre (début d'année) ou d'aujourd'hui si on est déjà après
+function semainesRestantes() {
+  const today = new Date();
+  today.setHours(12,0,0,0);
+
+  if(today >= FIN_ANNEE) return 0;
+
+  const annee = today.getMonth() >= 8 ? today.getFullYear() : today.getFullYear() - 1;
+  const debutAnnee = new Date(annee + '-09-01T12:00:00');
+  const depart = today > debutAnnee ? today : debutAnnee;
+
+  const msParJour = 1000*60*60*24;
+  const joursTotal = Math.ceil((FIN_ANNEE - depart) / msParJour);
+  const semainesCalendaires = joursTotal / 7;
+
+  let semainesOff = 0;
+  PERIODES_OFF.forEach(([debut, fin]) => {
+    const d = new Date(debut + 'T12:00:00');
+    const f = new Date(fin   + 'T12:00:00');
+    if(f > depart) {
+      const start = d > depart ? d : depart;
+      const duree = Math.max(0, Math.ceil((f - start) / msParJour)) / 7;
+      semainesOff += duree;
+    }
+  });
+
+  return Math.max(0, Math.round((semainesCalendaires - semainesOff) * 10) / 10);
+}
+
+function loadDB(){try{return JSON.parse(localStorage.getItem(KEY))||{};}catch(e){return {};}}
+function saveDB(db){localStorage.setItem(KEY,JSON.stringify(db));}
+
+function sy(date){const d=new Date(date+'T12:00:00');const m=d.getMonth();const y=d.getFullYear();return m>=8?`${y}-${y+1}`:`${y-1}-${y}`;}
+function curY(){return sy(new Date().toISOString().slice(0,10));}
+function selY(){return document.getElementById('ys').value;}
+
+function fmtH(h){
+  const neg = h < 0;
+  h = Math.abs(h);
+  const i=Math.floor(h);
+  const m=Math.round((h-i)*60);
+  const s = m>0?`${i}h${m.toString().padStart(2,'0')}`:`${i}h`;
+  return neg ? '−'+s : s;
+}
+function fmtDate(s){const d=new Date(s+'T12:00:00');return `${DFR[d.getDay()]} ${d.getDate()} ${MFR[d.getMonth()]} ${d.getFullYear()}`;}
+function mkey(s){const d=new Date(s+'T12:00:00');return `${MFR[d.getMonth()]} ${d.getFullYear()}`;}
+
+function typeLabel(type){
+  if(type==='tt') return '<span class="tag-tt">Télétravail</span>';
+  if(type==='dep') return '<span class="tag-dep">Dépassement</span>';
+  if(type==='sup') return '<span class="tag-sup">Heure sup.</span>';
+  return '';
+}
+
+function buildYears(){
+  const db=loadDB();
+  const years=new Set(Object.keys(db));years.add(curY());
+  const sorted=[...years].sort().reverse();
+  const sel=document.getElementById('ys');
+  const cur=sel.value||curY();
+  sel.innerHTML=sorted.map(y=>`<option value="${y}">${y.split('-')[0]}-${y.split('-')[1].slice(2)}</option>`).join('');
+  sel.value=sorted.includes(cur)?cur:sorted[0];
+}
+
+function getStats(entries){
+  const tt = entries.filter(e=>e.type==='tt').reduce((s,e)=>s+e.hours,0);
+  const dep = entries.filter(e=>e.type==='dep').reduce((s,e)=>s+e.hours,0);
+  const sup = entries.filter(e=>e.type==='sup').reduce((s,e)=>s+e.hours,0);
+  return {tt, dep, sup, total: tt+dep+sup};
+}
+
+function render(){
+  const db=loadDB();
+  const year=selY();
+  const entries=(db[year]||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const stats = getStats(entries);
+  const reste = QUOTA_TT - stats.total;
+  const semRest = semainesRestantes();
+  // Pour la moyenne hebdo : on utilise les semaines restantes si l'année est en cours,
+  // sinon le total annuel (pour consultation d'une année passée)
+  const isCurrentYear = selY() === curY();
+  const semDiviseur = (isCurrentYear && semRest > 0) ? semRest : SEMAINES_ANNEE;
+  const resteSem = semRest > 0 ? reste / semRest : 0;
+  const pct = Math.min(100, Math.round(stats.total / QUOTA_TT * 100));
+
+  const semLabel = isCurrentYear
+    ? `sur ${semRest} sem. restantes`
+    : `sur ${SEMAINES_ANNEE} sem. (année clôturée)`;
+
+  // Stats onglet suivi
+  document.getElementById('s-total').textContent = fmtH(stats.tt);
+  document.getElementById('s-days').textContent = `${entries.filter(e=>e.type==='tt').length} jour${entries.filter(e=>e.type==='tt').length>1?'s':''} saisi${entries.filter(e=>e.type==='tt').length>1?'s':''}`;
+  document.getElementById('s-dep').textContent = fmtH(stats.dep);
+  document.getElementById('s-dep-n').textContent = `${entries.filter(e=>e.type==='dep').length} entrée${entries.filter(e=>e.type==='dep').length>1?'s':''}`;
+  document.getElementById('s-sup').textContent = fmtH(stats.sup);
+  document.getElementById('s-sup-n').textContent = `${entries.filter(e=>e.type==='sup').length} entrée${entries.filter(e=>e.type==='sup').length>1?'s':''}`;
+  document.getElementById('s-rest').textContent = fmtH(Math.max(0, reste));
+  document.getElementById('s-rest-sem').textContent = reste > 0
+    ? `≈ ${fmtH(resteSem)} / sem. (${semRest} sem. restantes)`
+    : '✓ quota atteint';
+  document.getElementById('s-rest').style.color = reste <= 0 ? 'var(--green)' : 'var(--blue)';
+
+  document.getElementById('cnt').textContent = entries.length ? `(${entries.length})` : '';
+
+  // Bilan dynamique
+  document.getElementById('b-fait').textContent = fmtH(stats.total);
+  document.getElementById('b-fait-det').textContent = `TT ${fmtH(stats.tt)} · dép. ${fmtH(stats.dep)} · sup. ${fmtH(stats.sup)}`;
+  document.getElementById('b-reste').textContent = fmtH(Math.max(0, reste));
+  document.getElementById('b-reste').style.color = reste <= 0 ? 'var(--green)' : 'var(--blue)';
+  document.getElementById('b-reste-sem').textContent = reste > 0
+    ? `≈ ${fmtH(resteSem)} / semaine · ${semLabel}`
+    : '✓ quota atteint';
+  document.getElementById('b-pct').textContent = pct + ' %';
+  document.getElementById('b-bar').style.width = pct + '%';
+
+  document.getElementById('b5-tt').textContent = `− ${fmtH(stats.tt)}`;
+  document.getElementById('b5-dep').textContent = `− ${fmtH(stats.dep)}`;
+  document.getElementById('b5-sup').textContent = `− ${fmtH(stats.sup)}`;
+  document.getElementById('b5-reste').textContent = fmtH(Math.max(0, reste));
+  document.getElementById('b5-sem').textContent = reste > 0
+    ? `≈ ${fmtH(resteSem)} / sem. · ${semLabel}`
+    : '✓ quota atteint';
+  document.getElementById('b5-ex').textContent = reste > 0 ? `≈ ${fmtH(resteSem/2)} / jour (mer. + ven.)` : '—';
+
+  // Tableau historique
+  const tb=document.getElementById('tb');
+  if(!entries.length){tb.innerHTML='<tr><td colspan="5" class="empty">Aucune entrée pour cette année scolaire.</td></tr>';return;}
+
+  let html='';let lm=null;
+  entries.forEach(e=>{
+    const m=mkey(e.date);
+    if(m!==lm){
+      const mt=entries.filter(x=>mkey(x.date)===m).reduce((s,x)=>s+x.hours,0);
+      html+=`<tr class="mg"><td colspan="5">${m} — ${fmtH(mt)}</td></tr>`;
+      lm=m;
+    }
+    const noteEsc=(e.note||'').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+    const hclass = e.type==='tt' ? 'h' : e.type==='sup' ? 'h2' : 'h';
+    html+=`<tr>
+      <td>${fmtDate(e.date)}</td>
+      <td class="tag">${typeLabel(e.type)}</td>
+      <td class="${hclass}">${fmtH(e.hours)}</td>
+      <td class="n" title="${noteEsc}">${e.note||'<span style="color:var(--g3)">—</span>'}</td>
+      <td style="width:40px;text-align:right"><button class="bd" onclick="delEntry('${year}','${e.id}')">✕</button></td>
+    </tr>`;
+  });
+  tb.innerHTML=html;
+}
+
+function addEntry(type){
+  const err = document.getElementById('err-'+type);
+  err.textContent = '';
+
+  let date, hours, note;
+
+  if(type==='tt'){
+    date = document.getElementById('tt-date').value;
+    hours = parseFloat(document.getElementById('tt-h').value);
+    note = document.getElementById('tt-n').value.trim();
+  } else if(type==='dep'){
+    date = document.getElementById('dep-date').value;
+    hours = parseFloat(document.getElementById('dep-h').value);
+    const fin = document.getElementById('dep-fin').value.trim();
+    note = document.getElementById('dep-n').value.trim();
+    if(fin) note = `Fin ${fin}${note ? ' · '+note : ''}`;
+  } else {
+    date = document.getElementById('sup-date').value;
+    hours = parseFloat(document.getElementById('sup-h').value);
+    const debut = document.getElementById('sup-debut').value.trim();
+    note = document.getElementById('sup-n').value.trim();
+    if(debut) note = `Début ${debut}${note ? ' · '+note : ''}`;
+  }
+
+  if(!date){err.textContent='Choisir une date.';return;}
+  if(!hours||isNaN(hours)||hours<=0){err.textContent="Saisir un nombre d'heures valide.";return;}
+
+  const db=loadDB();
+  const year=sy(date);
+  if(!db[year])db[year]=[];
+
+  // Pour le télétravail uniquement : une seule entrée par jour
+  if(type==='tt' && db[year].find(e=>e.date===date && e.type==='tt')){
+    err.textContent='Un télétravail existe déjà pour ce jour.';return;
+  }
+
+  db[year].push({id:Date.now().toString(), date, hours, note, type});
+  saveDB(db);
+
+  // Reset champs
+  ['tt-h','tt-n','dep-fin','dep-h','dep-n','sup-debut','sup-h','sup-n'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+
+  buildYears();
+  document.getElementById('ys').value=year;
+  render();
+  const labels={tt:'Télétravail',dep:'Dépassement',sup:'Heure sup.'};
+  toast(`${labels[type]} — ${fmtH(hours)} le ${fmtDate(date)}`);
+}
+
+function delEntry(year,id){
+  const db=loadDB();
+  db[year]=(db[year]||[]).filter(e=>e.id!==id);
+  saveDB(db);render();toast('Entrée supprimée.');
+}
+
+function showForm(type, btn){
+  ['tt','dep','sup'].forEach(t=>{
+    document.getElementById('form-'+t).style.display = t===type ? 'block' : 'none';
+  });
+  document.querySelectorAll('.ctab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function showTab(tab, btn){
+  document.getElementById('tab-suivi').style.display = tab==='suivi' ? 'flex' : 'none';
+  document.getElementById('tab-bilan').style.display = tab==='bilan' ? 'flex' : 'none';
+  if(tab==='bilan') document.getElementById('tab-bilan').style.flexDirection='column';
+  document.getElementById('yr-select').style.display = tab==='suivi' ? 'flex' : 'none';
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function exportCSV(){
+  const db=loadDB();const year=selY();
+  const entries=(db[year]||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
+  if(!entries.length){toast('Aucune donnée à exporter.');return;}
+  const labels={tt:'Télétravail',dep:'Dépassement',sup:'Heure sup.'};
+  let csv='Date;Type;Heures;Note\n';
+  entries.forEach(e=>{csv+=`${e.date};${labels[e.type]||e.type};${fmtH(e.hours)};"${(e.note||'').replace(/"/g,'""')}"\n`;});
+  const stats=getStats(entries);
+  csv+=`\nTotal télétravail;;${fmtH(stats.tt)}\nTotal dépassements;;${fmtH(stats.dep)}\nTotal heures sup.;;${fmtH(stats.sup)}\nTotal général;;${fmtH(stats.total)}`;
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`teletravail_${year}.csv`;a.click();URL.revokeObjectURL(a.href);
+  toast('CSV téléchargé.');
+}
+
+function exportPDF(){
+  const db=loadDB();const year=selY();
+  const entries=(db[year]||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
+  if(!entries.length){toast('Aucune donnée à exporter.');return;}
+  const stats=getStats(entries);
+  const reste=Math.max(0,QUOTA_TT-stats.total);
+  const byM={};
+  entries.forEach(e=>{const k=mkey(e.date);if(!byM[k])byM[k]=[];byM[k].push(e);});
+  const labels={tt:'Télétravail',dep:'Dépassement',sup:'Heure sup.'};
+  let rows='';
+  Object.entries(byM).forEach(([m,mes])=>{
+    const mt=mes.reduce((s,e)=>s+e.hours,0);
+    rows+=`<tr class="mg"><td colspan="4">${m} — <strong>${fmtH(mt)}</strong></td></tr>`;
+    mes.forEach(e=>{rows+=`<tr><td>${fmtDate(e.date)}</td><td class="tag">${labels[e.type]||e.type}</td><td class="h">${fmtH(e.hours)}</td><td class="n">${(e.note||'').replace(/</g,'&lt;')}</td></tr>`;});
+  });
+  const today=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+  const [y1,y2]=year.split('-');
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Teletravail ${y1}-${y2.slice(2)}</title><style>
+body{font-family:Arial,sans-serif;font-size:12px;color:#222;padding:32px 40px}
+h1{font-size:17px;color:#0C447C;margin-bottom:4px}.sub{font-size:11px;color:#666;margin-bottom:22px}
+.stats{display:flex;gap:32px;margin-bottom:22px;padding:14px 18px;background:#E6F1FB;border-radius:6px}
+.sl{font-size:10px;color:#185FA5;margin-bottom:2px}.sv{font-size:20px;font-weight:700;color:#0C447C}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:10px;color:#888;padding:7px 12px;border-bottom:1px solid #ddd;background:#f5f4f0;letter-spacing:.3px}
+td{padding:7px 12px;border-bottom:1px solid #f0eeea;vertical-align:top}
+td.h{font-weight:600;color:#0C447C;width:60px}td.tag{font-size:11px;color:#555;width:90px}td.n{color:#666}
+tr.mg td{background:#f5f4f0;font-weight:600;font-size:11px;color:#333;padding:8px 12px;border-top:1px solid #ccc;border-bottom:1px solid #ccc}
+.footer{margin-top:32px;font-size:10px;color:#aaa;border-top:1px solid #eee;padding-top:10px}
+@media print{body{padding:16px}}
+</style></head><body>
+<h1>Relevé de télétravail ${y1}-${y2.slice(2)}</h1>
+<p class="sub">Mikael Michelas · Lycée Saint Victor, Valence · Édité le ${today}</p>
+<div class="stats">
+  <div><div class="sl">Télétravail</div><div class="sv">${fmtH(stats.tt)}</div></div>
+  <div><div class="sl">Dépassements</div><div class="sv">${fmtH(stats.dep)}</div></div>
+  <div><div class="sl">Heures sup.</div><div class="sv">${fmtH(stats.sup)}</div></div>
+  <div><div class="sl">Total imputé</div><div class="sv">${fmtH(stats.total)}</div></div>
+  <div><div class="sl">Quota TT restant</div><div class="sv">${fmtH(reste)}</div></div>
+</div>
+<table><thead><tr><th>Date</th><th>Type</th><th>Heures</th><th>Note</th></tr></thead><tbody>${rows}</tbody></table>
+<div class="footer">Lycée Saint Victor · Valence · Document généré automatiquement · Base conventionnelle CEPNL 2025 · Contrat 75 % · Quota TT annuel : ${fmtH(QUOTA_TT)}</div>
+</body></html>`);
+  w.document.close();
+  setTimeout(()=>w.print(),500);
+}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// Init
+document.getElementById('tt-date').value=new Date().toISOString().slice(0,10);
+document.getElementById('dep-date').value=new Date().toISOString().slice(0,10);
+document.getElementById('sup-date').value=new Date().toISOString().slice(0,10);
+['tt-h','dep-h','sup-h','tt-n','dep-n','sup-n'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter'){
+    if(id.startsWith('tt')) addEntry('tt');
+    else if(id.startsWith('dep')) addEntry('dep');
+    else addEntry('sup');
+  }});
+});
+buildYears();render();
+</script>
+</body>
+</html>
