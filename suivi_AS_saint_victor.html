@@ -156,7 +156,7 @@ textarea { resize: vertical; min-height: 60px; }
 <body>
 
 <div class="header">
-  <img id="header-logo" src="" alt="Etablissement Saint Victor" style="height:44px"><span style="color:white;font-size:28px;font-weight:700;letter-spacing:0.02em;margin-left:10px">Saint Victor</span>
+  <img id="header-logo" src="" alt="Saint Victor" style="height:44px"><span style="color:white;font-size:22px;font-weight:700;letter-spacing:0.02em;margin-left:10px">Établissement Saint Victor</span>
   <span class="header-title">Suivi Association Sportive</span>
   <div class="header-right">
     <span class="sync-badge sync-err" id="sync-status">⬤ Hors ligne</span>
@@ -281,13 +281,13 @@ textarea { resize: vertical; min-height: 60px; }
         <label>Trimestres concernés</label>
         <div style="display:flex;gap:20px;margin-top:6px;flex-wrap:wrap">
           <label style="display:flex;align-items:center;gap:6px;font-size:14px;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer">
-            <input type="checkbox" id="r-t1" value="1" style="width:auto"> T1 — 15 sept → 19 déc 2025
+            <input type="checkbox" id="r-t1" value="1" style="width:auto"> T1 — 1 sept → 27 nov 2025
           </label>
           <label style="display:flex;align-items:center;gap:6px;font-size:14px;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer">
-            <input type="checkbox" id="r-t2" value="2" style="width:auto"> T2 — 6 jan → 27 mars 2026
+            <input type="checkbox" id="r-t2" value="2" style="width:auto"> T2 — 30 nov 2025 → 12 mars 2026
           </label>
           <label style="display:flex;align-items:center;gap:6px;font-size:14px;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer">
-            <input type="checkbox" id="r-t3" value="3" style="width:auto"> T3 — 20 avr → 3 juil 2026
+            <input type="checkbox" id="r-t3" value="3" style="width:auto"> T3 — 15 mars → 18 juin 2026
           </label>
         </div>
         <div class="err-msg" id="err-trim" style="display:none">Sélectionnez au moins un trimestre.</div>
@@ -411,7 +411,7 @@ textarea { resize: vertical; min-height: 60px; }
 
 <script>
 // ── CONFIG ──
-const PROFS = ["Anne Caty", "Charly Duroux", "David Alba" , "Frédéric Bourrellier",  "Ruddy Rome"];
+const PROFS = ["David Alba", "Frédéric Bourrellier", "Anne Caty", "Charly Duroux", "Ruddy Rome"];
 const OBJECTIF = 108; // heures annuelles par prof
 const BIN_NAME = "as_saint_victor_2025";
 
@@ -585,8 +585,8 @@ function renderDashboard() {
     const h = hPonct + hRec;
     const pct = Math.min(100, Math.round(h / OBJECTIF * 100));
     const color = pct >= 80 ? '#16A34A' : pct >= 40 ? '#D97706' : '#1B3A8C';
-    const tagClass = pct >= 80 ? 'tag-ok' : pct >= 40 ? 'tag-warn' : 'tag-low';
-    const tagText = pct >= 80 ? 'En bonne voie' : pct >= 40 ? 'À suivre' : 'Insuffisant';
+    const tagClass = pct >= 100 ? 'tag-ok' : pct > 0 ? 'tag-warn' : 'tag-low';
+    const tagText = pct >= 100 ? 'Complet' : pct > 0 ? 'Partiel' : 'À compléter';
     const recLabel = hRec > 0 ? ` <span style="font-size:11px;color:var(--text-muted)">(dont ${hRec.toFixed(1)}h récurrents)</span>` : '';
     html += `<div class="prof-row">
       <span class="prof-name">${prof}</span>
@@ -815,14 +815,14 @@ const JOURS = ['','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanc
 
 // Bornes officielles des trimestres (année scolaire 2025-2026)
 const TRIM_BORNES = {
-  1: { debut: '2025-09-15', fin: '2025-12-19' },
-  2: { debut: '2026-01-06', fin: '2026-03-27' },
-  3: { debut: '2026-04-20', fin: '2026-07-03' }
+  1: { debut: '2025-09-01', fin: '2025-11-27' },
+  2: { debut: '2025-11-30', fin: '2026-03-12' },
+  3: { debut: '2026-03-15', fin: '2026-06-18' }
 };
 const TRIM_LABELS = {
-  1: 'T1 — 15 sept → 19 déc 2025',
-  2: 'T2 — 6 jan → 27 mars 2026',
-  3: 'T3 — 20 avr → 3 juil 2026'
+  1: 'T1 — 1 sept → 27 nov 2025',
+  2: 'T2 — 30 nov 2025 → 12 mars 2026',
+  3: 'T3 — 15 mars → 18 juin 2026'
 };
 
 function getDatesInPeriod(jourSem, debut, fin, exclusions) {
