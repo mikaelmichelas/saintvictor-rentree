@@ -240,7 +240,7 @@ textarea { resize: vertical; min-height: 60px; }
 <div id="tab-recurrence" class="tab-content" style="display:none">
   <div class="form-card" style="margin-bottom:1.5rem">
     <div style="font-size:15px;font-weight:600;margin-bottom:4px;">Créer un créneau récurrent</div>
-    <div style="font-size:13px;color:var(--text-sec);margin-bottom:16px;">Ex : ping pong tous les lundis midi de janvier à mars — saisie unique, compteur automatique.</div>
+    <div style="font-size:13px;color:var(--text-sec);margin-bottom:16px;">Saisie unique — l'appli calcule automatiquement les heures sur les trimestres sélectionnés.</div>
     <div class="form-grid">
       <div class="form-row">
         <label>Enseignant</label>
@@ -252,6 +252,15 @@ textarea { resize: vertical; min-height: 60px; }
           <option value="Atelier">Animation atelier (midi)</option>
           <option value="Compétition">Compétition (mercredi extérieur)</option>
           <option value="Préparation">Préparation / déplacement</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Discipline</label>
+        <select id="r-sport">
+          <option value="Tennis de table">Tennis de table</option>
+          <option value="Handball">Handball</option>
+          <option value="Danse">Danse</option>
+          <option value="Futsal">Futsal</option>
         </select>
       </div>
       <div class="form-row">
@@ -268,17 +277,20 @@ textarea { resize: vertical; min-height: 60px; }
         <label>Durée par séance (h)</label>
         <input type="number" id="r-duree" min="0.5" max="6" step="0.5" placeholder="ex : 1.5">
       </div>
-      <div class="form-row">
-        <label>Date de début</label>
-        <input type="date" id="r-debut">
-      </div>
-      <div class="form-row">
-        <label>Date de fin</label>
-        <input type="date" id="r-fin">
-      </div>
       <div class="form-row full">
-        <label>Discipline / contexte</label>
-        <input type="text" id="r-contexte" placeholder="ex : Ping pong — Salle polyvalente">
+        <label>Trimestres concernés</label>
+        <div style="display:flex;gap:20px;margin-top:6px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer">
+            <input type="checkbox" id="r-t1" value="1" style="width:auto"> T1 — 15 sept → 19 déc 2025
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer">
+            <input type="checkbox" id="r-t2" value="2" style="width:auto"> T2 — 6 jan → 27 mars 2026
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer">
+            <input type="checkbox" id="r-t3" value="3" style="width:auto"> T3 — 20 avr → 3 juil 2026
+          </label>
+        </div>
+        <div class="err-msg" id="err-trim" style="display:none">Sélectionnez au moins un trimestre.</div>
       </div>
       <div class="form-row full">
         <label>Dates à exclure (vacances, annulations) — séparées par des virgules</label>
@@ -399,7 +411,7 @@ textarea { resize: vertical; min-height: 60px; }
 
 <script>
 // ── CONFIG ──
-const PROFS = ["Anne Caty","Charly Duroux", "David Alba","Frédéric Bourrellier","Ruddy Rome"];
+const PROFS = ["Ruddy Rome", "Anne Caty", "Frédéric Bourrellier", "Charly Duroux", "David Alba"];
 const OBJECTIF = 108; // heures annuelles par prof
 const BIN_NAME = "as_saint_victor_2025";
 
@@ -788,8 +800,6 @@ function populateRecurrenceSelects() {
   const el = document.getElementById('r-prof');
   if (!el || el.options.length > 0) return;
   PROFS.forEach(p => { const o = new Option(p,p); el.appendChild(o); });
-  const today = new Date().toISOString().split('T')[0];
-  if (!document.getElementById('r-debut').value) document.getElementById('r-debut').value = today;
 }
 
 function populateFilters() {
@@ -803,12 +813,23 @@ function populateFilters() {
 
 const JOURS = ['','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 
-function getDatesRecurrence(jourSem, debut, fin, exclusions) {
+// Bornes officielles des trimestres (année scolaire 2025-2026)
+const TRIM_BORNES = {
+  1: { debut: '2025-09-15', fin: '2025-12-19' },
+  2: { debut: '2026-01-06', fin: '2026-03-27' },
+  3: { debut: '2026-04-20', fin: '2026-07-03' }
+};
+const TRIM_LABELS = {
+  1: 'T1 — 15 sept → 19 déc 2025',
+  2: 'T2 — 6 jan → 27 mars 2026',
+  3: 'T3 — 20 avr → 3 juil 2026'
+};
+
+function getDatesInPeriod(jourSem, debut, fin, exclusions) {
   const dates = [];
-  const d = new Date(debut);
-  const f = new Date(fin);
-  const excl = exclusions.map(e => e.trim()).filter(Boolean);
-  // Avancer jusqu'au bon jour
+  const d = new Date(debut + 'T12:00:00');
+  const f = new Date(fin + 'T12:00:00');
+  const excl = (exclusions || []).map(e => e.trim()).filter(Boolean);
   while (d.getDay() !== parseInt(jourSem)) d.setDate(d.getDate() + 1);
   while (d <= f) {
     const ds = d.toISOString().split('T')[0];
@@ -818,55 +839,77 @@ function getDatesRecurrence(jourSem, debut, fin, exclusions) {
   return dates;
 }
 
+function getSelectedTrims() {
+  return [1,2,3].filter(t => document.getElementById('r-t' + t)?.checked);
+}
+
+function getDatesRecurrenceAll(r) {
+  const trims = r.trims || [];
+  const excl = r.exclusions || [];
+  let allDates = [];
+  trims.forEach(t => {
+    const b = TRIM_BORNES[t];
+    if (b) allDates = allDates.concat(getDatesInPeriod(r.jourSem, b.debut, b.fin, excl));
+  });
+  return [...new Set(allDates)].sort();
+}
+
 function previewRecurrence() {
   const jourSem = document.getElementById('r-jour').value;
   const duree = parseFloat(document.getElementById('r-duree').value);
-  const debut = document.getElementById('r-debut').value;
-  const fin = document.getElementById('r-fin').value;
+  const trims = getSelectedTrims();
   const exclRaw = document.getElementById('r-exclusions').value.split(',');
   const prev = document.getElementById('r-preview');
 
-  if (!debut || !fin || isNaN(duree) || duree <= 0) {
+  if (trims.length === 0) {
     prev.style.display = 'block';
-    prev.innerHTML = '⚠️ Renseignez le jour, la durée, et les dates de début/fin.';
-    return;
+    prev.innerHTML = '⚠️ Sélectionnez au moins un trimestre.'; return;
   }
-  if (new Date(fin) <= new Date(debut)) {
+  if (isNaN(duree) || duree <= 0) {
     prev.style.display = 'block';
-    prev.innerHTML = '⚠️ La date de fin doit être après la date de début.';
-    return;
+    prev.innerHTML = '⚠️ Saisissez une durée par séance.'; return;
   }
 
-  const dates = getDatesRecurrence(jourSem, debut, fin, exclRaw);
+  const fakeRec = { jourSem, trims, exclusions: exclRaw, duree };
+  const dates = getDatesRecurrenceAll(fakeRec);
   const totalH = (dates.length * duree).toFixed(1);
+
+  let byTrim = trims.map(t => {
+    const b = TRIM_BORNES[t];
+    const n = getDatesInPeriod(jourSem, b.debut, b.fin, exclRaw).length;
+    return `T${t} : ${n} séance${n>1?'s':''} (${(n*duree).toFixed(1)}h)`;
+  }).join(' · ');
+
   prev.style.display = 'block';
-  prev.innerHTML = `<strong>${dates.length} séances</strong> générées → <strong>${totalH}h</strong> au compteur.<br>
-    <span style="color:var(--text-muted)">${dates.slice(0,5).join(', ')}${dates.length > 5 ? ' … (et ' + (dates.length-5) + ' autres)' : ''}</span>`;
+  prev.innerHTML = `<strong>${dates.length} séances au total → ${totalH}h</strong><br>
+    <span style="color:var(--text-muted)">${byTrim}</span><br>
+    <span style="color:var(--text-muted);font-size:12px">${dates.slice(0,4).join(', ')}${dates.length > 4 ? ' … (+' + (dates.length-4) + ')' : ''}</span>`;
 }
 
 async function ajouterRecurrence() {
   const prof = document.getElementById('r-prof').value;
   const type = document.getElementById('r-type').value;
+  const sport = document.getElementById('r-sport').value;
   const jourSem = document.getElementById('r-jour').value;
   const duree = parseFloat(document.getElementById('r-duree').value);
-  const debut = document.getElementById('r-debut').value;
-  const fin = document.getElementById('r-fin').value;
-  const contexte = document.getElementById('r-contexte').value.trim();
+  const trims = getSelectedTrims();
   const exclRaw = document.getElementById('r-exclusions').value.split(',');
 
-  if (!debut || !fin || isNaN(duree) || duree <= 0 || new Date(fin) <= new Date(debut)) {
-    alert('Vérifiez les champs : durée, dates de début et fin.'); return;
-  }
+  document.getElementById('err-trim').style.display = trims.length === 0 ? 'block' : 'none';
+  if (trims.length === 0 || isNaN(duree) || duree <= 0) return;
 
   const exclusions = exclRaw.map(e => e.trim()).filter(Boolean);
-  const rec = { id: Date.now(), prof, type, jourSem, duree: duree.toFixed(1), debut, fin, contexte, exclusions };
+  const rec = { id: Date.now(), prof, type, sport, jourSem, duree: duree.toFixed(1), trims, exclusions };
 
   if (!db.recurrences) db.recurrences = [];
   db.recurrences.push(rec);
   const ok = await saveDB();
   if (ok) {
-    ['r-contexte','r-exclusions','r-duree','r-debut','r-fin'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('r-duree').value = '';
+    document.getElementById('r-exclusions').value = '';
+    [1,2,3].forEach(t => { const el = document.getElementById('r-t'+t); if(el) el.checked = false; });
     document.getElementById('r-preview').style.display = 'none';
+    document.getElementById('err-trim').style.display = 'none';
     const msg = document.getElementById('msg-recurrence');
     msg.style.display = 'inline-block';
     setTimeout(() => msg.style.display = 'none', 2500);
@@ -890,23 +933,24 @@ function renderRecurrenceList() {
   if (db.recurrences.length === 0) {
     el.innerHTML = '<div class="empty">Aucun créneau récurrent configuré.</div>'; return;
   }
+  const typeColors = { 'Compétition': '#1B3A8C', 'Atelier': '#166534', 'Préparation': '#92400E' };
+  const typeBg = { 'Compétition': '#EEF2FA', 'Atelier': '#DCFCE7', 'Préparation': '#FEF3C7' };
   let html = `<table class="data-table"><thead><tr>
-    <th>Enseignant</th><th>Type</th><th>Jour</th><th>Durée/séance</th><th>Période</th><th>Séances</th><th>Total</th><th>Contexte</th><th></th>
+    <th>Enseignant</th><th>Discipline</th><th>Type</th><th>Jour</th><th>h/séance</th><th>Trimestres</th><th>Séances</th><th>Total</th><th></th>
   </tr></thead><tbody>`;
   db.recurrences.forEach((r, idx) => {
-    const dates = getDatesRecurrence(r.jourSem, r.debut, r.fin, r.exclusions || []);
+    const dates = getDatesRecurrenceAll(r);
     const totalH = (dates.length * parseFloat(r.duree)).toFixed(1);
-    const typeColors = { 'Compétition': '#1B3A8C', 'Atelier': '#166534', 'Préparation': '#92400E' };
-    const typeBg = { 'Compétition': '#EEF2FA', 'Atelier': '#DCFCE7', 'Préparation': '#FEF3C7' };
+    const trimLabels = (r.trims||[]).map(t => `<span class="badge-trim">T${t}</span>`).join(' ');
     html += `<tr>
       <td><strong>${r.prof}</strong></td>
+      <td><strong>${r.sport||'—'}</strong></td>
       <td><span style="background:${typeBg[r.type]||'#EEF2FA'};color:${typeColors[r.type]||'#1B3A8C'};padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">${r.type}</span></td>
       <td>${JOURS[r.jourSem]}</td>
       <td>${r.duree}h</td>
-      <td style="font-size:12px;color:var(--text-sec)">${r.debut} → ${r.fin}</td>
+      <td>${trimLabels}</td>
       <td style="text-align:center"><strong>${dates.length}</strong></td>
       <td><strong style="color:var(--sv-blue)">${totalH}h</strong></td>
-      <td style="font-size:12px;color:var(--text-sec)">${r.contexte||'—'}</td>
       <td><button class="btn-del" onclick="supprimerRecurrence(${idx})">×</button></td>
     </tr>`;
   });
@@ -914,26 +958,26 @@ function renderRecurrenceList() {
   el.innerHTML = html;
 }
 
-// Calcule les heures issues des récurrences pour un prof
+// Heures récurrences pour un prof (toutes périodes)
 function heuresRecurrences(prof) {
   if (!db.recurrences) return 0;
   return db.recurrences
     .filter(r => r.prof === prof)
     .reduce((acc, r) => {
-      const dates = getDatesRecurrence(r.jourSem, r.debut, r.fin, r.exclusions || []);
+      const dates = getDatesRecurrenceAll(r);
       return acc + dates.length * parseFloat(r.duree);
     }, 0);
 }
 
-// Heures récurrences pour un trimestre
+// Heures récurrences pour un prof sur un trimestre donné
 function heuresRecurrencesTrim(prof, trim) {
   if (!db.recurrences) return 0;
   return db.recurrences
-    .filter(r => r.prof === prof)
+    .filter(r => r.prof === prof && (r.trims||[]).includes(trim))
     .reduce((acc, r) => {
-      const dates = getDatesRecurrence(r.jourSem, r.debut, r.fin, r.exclusions || []);
-      const filtered = dates.filter(d => getTrim(d) === trim);
-      return acc + filtered.length * parseFloat(r.duree);
+      const b = TRIM_BORNES[trim];
+      const dates = getDatesInPeriod(r.jourSem, b.debut, b.fin, r.exclusions || []);
+      return acc + dates.length * parseFloat(r.duree);
     }, 0);
 }
 
