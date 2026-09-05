@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suivi AS — Saint Victor</title>
+<style>
+:root {
+  --sv-blue: #1B3A8C;
+  --sv-blue-dark: #122870;
+  --sv-blue-mid: #2850B8;
+  --sv-orange: #E8872A;
+  --sv-violet: #8B3FC8;
+  --sv-sky: #6BB8E0;
+  --sv-mint: #A0D8EF;
+  --bg: #F5F7FC;
+  --surface: #FFFFFF;
+  --surface2: #EEF2FA;
+  --border: #D4DCF0;
+  --text: #111827;
+  --text-sec: #4B5563;
+  --text-muted: #9CA3AF;
+  --radius: 10px;
+  --shadow: 0 1px 4px rgba(27,58,140,0.08);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.5; }
+
+/* HEADER */
+.header { background: var(--sv-blue); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 62px; }
+.header img { height: 44px; }
+.header-title { color: white; font-size: 13px; opacity: 0.75; letter-spacing: 0.04em; text-transform: uppercase; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.sync-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+.sync-ok { background: rgba(96,200,120,0.2); color: #7EE8A2; }
+.sync-err { background: rgba(232,135,42,0.2); color: var(--sv-orange); }
+
+/* SETUP BANNER */
+.setup-banner { background: #FFF8F0; border-bottom: 1px solid #F0D5B0; padding: 10px 2rem; font-size: 13px; color: #7A4A00; display: flex; align-items: center; gap: 12px; }
+.setup-banner a { color: var(--sv-blue); font-weight: 500; }
+.setup-banner input { border: 1px solid #D0A060; border-radius: 6px; padding: 4px 10px; font-size: 12px; width: 340px; font-family: monospace; }
+.setup-banner button { padding: 4px 14px; border-radius: 6px; border: none; background: var(--sv-blue); color: white; font-size: 12px; cursor: pointer; }
+
+/* NAV TABS */
+.nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; gap: 0; }
+.nav button { background: none; border: none; border-bottom: 3px solid transparent; padding: 14px 18px; font-size: 14px; cursor: pointer; color: var(--text-sec); transition: all .15s; font-weight: 500; }
+.nav button.active { color: var(--sv-blue); border-bottom-color: var(--sv-blue); }
+.nav button:hover:not(.active) { color: var(--text); }
+
+/* MAIN */
+.main { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+
+/* CARDS GRID */
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 1.75rem; }
+.card { background: var(--surface); border-radius: var(--radius); padding: 16px 18px; border: 1px solid var(--border); }
+.card .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 6px; }
+.card .value { font-size: 28px; font-weight: 700; color: var(--sv-blue); }
+.card .sub { font-size: 12px; color: var(--text-sec); margin-top: 3px; }
+.card.highlight { background: var(--sv-blue); border-color: var(--sv-blue); }
+.card.highlight .label { color: rgba(255,255,255,0.6); }
+.card.highlight .value { color: white; }
+.card.highlight .sub { color: rgba(255,255,255,0.7); }
+
+/* SECTION TITLE */
+.section-title { font-size: 13px; font-weight: 600; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+
+/* PROF BARS */
+.prof-table { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; margin-bottom: 1.75rem; }
+.prof-row { display: grid; grid-template-columns: 160px 1fr 100px 80px; align-items: center; padding: 13px 18px; border-bottom: 1px solid var(--border); gap: 14px; }
+.prof-row:last-child { border-bottom: none; }
+.prof-row.head { background: var(--surface2); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); padding: 8px 18px; }
+.prof-name { font-weight: 600; font-size: 14px; }
+.bar-wrap { display: flex; align-items: center; gap: 10px; }
+.bar-bg { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width .4s ease; }
+.bar-pct { font-size: 12px; color: var(--text-sec); min-width: 36px; text-align: right; }
+.bar-h { font-size: 13px; text-align: right; color: var(--text); }
+.bar-trim { font-size: 11px; color: var(--text-muted); text-align: right; }
+.tag { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.tag-ok { background: #DCFCE7; color: #166534; }
+.tag-warn { background: #FEF3C7; color: #92400E; }
+.tag-low { background: #FEE2E2; color: #991B1B; }
+
+/* FORM */
+.form-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 24px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-row { display: flex; flex-direction: column; gap: 5px; }
+.form-row.full { grid-column: 1 / -1; }
+label { font-size: 12px; font-weight: 600; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.04em; }
+input[type=text], input[type=number], input[type=date], select, textarea {
+  border: 1px solid var(--border); border-radius: 7px; padding: 9px 12px; font-size: 14px;
+  width: 100%; background: var(--bg); color: var(--text); font-family: inherit;
+  transition: border-color .15s;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--sv-blue); background: white; }
+textarea { resize: vertical; min-height: 60px; }
+.form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; align-items: center; }
+.btn-primary { background: var(--sv-blue); color: white; border: none; border-radius: 7px; padding: 10px 22px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s; }
+.btn-primary:hover { background: var(--sv-blue-mid); }
+.btn-sec { background: none; color: var(--sv-blue); border: 1px solid var(--border); border-radius: 7px; padding: 10px 18px; font-size: 14px; cursor: pointer; }
+.btn-sec:hover { background: var(--surface2); }
+.success-msg { font-size: 13px; color: #166534; background: #DCFCE7; padding: 6px 14px; border-radius: 6px; display: none; }
+.err-msg { font-size: 12px; color: #991B1B; margin-top: 3px; display: none; }
+
+/* TABLE */
+.data-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+.data-table th { text-align: left; padding: 10px 14px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); background: var(--surface2); border-bottom: 1px solid var(--border); font-weight: 600; }
+.data-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text); }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--bg); }
+.btn-del { background: none; border: 1px solid #FECACA; border-radius: 5px; color: #991B1B; padding: 3px 9px; font-size: 11px; cursor: pointer; }
+.btn-del:hover { background: #FEE2E2; }
+
+/* FILTERS */
+.filters { display: flex; gap: 10px; margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
+.filters select { width: auto; font-size: 13px; }
+.filters label { font-size: 12px; text-transform: none; letter-spacing: 0; font-weight: 500; }
+
+/* MEDALS */
+.medal { font-size: 18px; }
+
+/* PODIUM CARDS */
+.podium-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.podium-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+.podium-card .sport { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 4px; }
+.podium-card .result { font-size: 20px; font-weight: 700; color: var(--sv-blue); margin-bottom: 4px; }
+.podium-card .meta { font-size: 12px; color: var(--text-sec); }
+
+/* EXPORT */
+.export-section { display: flex; flex-direction: column; gap: 14px; }
+.export-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; }
+.export-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.export-card p { font-size: 13px; color: var(--text-sec); margin-bottom: 14px; }
+.export-card .btns { display: flex; gap: 10px; }
+
+/* EMPTY */
+.empty { text-align: center; padding: 3rem 2rem; color: var(--text-muted); font-size: 14px; }
+
+/* CONFIG */
+.config-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.config-row input { flex: 1; }
+.badge-trim { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 1px 7px; font-size: 11px; color: var(--text-sec); }
+
+/* Loader */
+.loader { text-align: center; padding: 2rem; color: var(--text-sec); font-size: 13px; }
+
+@media (max-width: 600px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .prof-row { grid-template-columns: 1fr 1fr; }
+  .main { padding: 1rem; }
+  .header { padding: 0 1rem; }
+  .header-title { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img id="header-logo" src="" alt="Saint Victor" style="height:44px"><span style="color:white;font-size:18px;font-weight:700;letter-spacing:0.02em;margin-left:10px">Saint Victor</span>
+  <span class="header-title">Suivi Association Sportive</span>
+  <div class="header-right">
+    <span class="sync-badge sync-err" id="sync-status">⬤ Hors ligne</span>
+  </div>
+</div>
+
+<div class="setup-banner" id="setup-banner">
+  <span>⚙️ <strong>Configuration requise.</strong> Collez votre clé API JSONBin :</span>
+  <input type="text" id="api-key-input" placeholder="$2a$10$..." value="">
+  <button onclick="saveApiKey()">Enregistrer</button>
+  <span style="color:var(--text-muted);font-size:12px;">
+    Pas de clé ? <a href="https://jsonbin.io" target="_blank">Créez un compte gratuit sur jsonbin.io</a>, copiez votre Master Key.
+  </span>
+</div>
+
+<nav class="nav">
+  <button class="active" onclick="switchTab('dashboard')">📊 Tableau de bord</button>
+  <button onclick="switchTab('saisie')">➕ Séance ponctuelle</button>
+  <button onclick="switchTab('recurrence')">🔁 Créneaux récurrents</button>
+  <button onclick="switchTab('palmarès')">🏆 Palmarès</button>
+  <button onclick="switchTab('historique')">📋 Historique</button>
+  <button onclick="switchTab('export')">📤 Export</button>
+</nav>
+
+<div class="main">
+
+<!-- DASHBOARD -->
+<div id="tab-dashboard" class="tab-content">
+  <div id="dash-cards" class="cards-grid"></div>
+  <div class="section-title">Progression par enseignant — année complète (objectif 108h)</div>
+  <div id="dash-profs" class="prof-table">
+    <div class="loader">Chargement…</div>
+  </div>
+  <div class="section-title">Répartition par trimestre</div>
+  <div id="dash-trim" class="cards-grid"></div>
+</div>
+
+<!-- SAISIE -->
+<div id="tab-saisie" class="tab-content" style="display:none">
+  <div class="form-card">
+    <div class="form-grid">
+      <div class="form-row">
+        <label>Enseignant</label>
+        <select id="s-prof"></select>
+      </div>
+      <div class="form-row">
+        <label>Type de séance</label>
+        <select id="s-type">
+          <option value="Compétition">Compétition (mercredi extérieur)</option>
+          <option value="Atelier">Animation atelier (midi)</option>
+          <option value="Préparation">Préparation / déplacement</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Date</label>
+        <input type="date" id="s-date">
+      </div>
+      <div class="form-row">
+        <label>Durée (heures)</label>
+        <input type="number" id="s-duree" min="0.5" max="12" step="0.5" placeholder="ex : 3.5">
+        <span class="err-msg" id="err-duree">Saisissez une durée valide (0.5 – 12h)</span>
+      </div>
+      <div class="form-row full">
+        <label>Contexte (classes, discipline, lieu…)</label>
+        <input type="text" id="s-contexte" placeholder="ex : 5A 6B – Badminton – Gymnase Fontbarlettes">
+      </div>
+      <div class="form-row full">
+        <label>Remarques / résultat (optionnel)</label>
+        <input type="text" id="s-note" placeholder="ex : Bonne participation, 18 élèves présents">
+      </div>
+    </div>
+    <div class="form-actions">
+      <span class="success-msg" id="msg-saisie">✓ Séance enregistrée</span>
+      <button class="btn-sec" onclick="resetSaisie()">Effacer</button>
+      <button class="btn-primary" onclick="ajouterSeance()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- RECURRENCE -->
+<div id="tab-recurrence" class="tab-content" style="display:none">
+  <div class="form-card" style="margin-bottom:1.5rem">
+    <div style="font-size:15px;font-weight:600;margin-bottom:4px;">Créer un créneau récurrent</div>
+    <div style="font-size:13px;color:var(--text-sec);margin-bottom:16px;">Ex : ping pong tous les lundis midi de janvier à mars — saisie unique, compteur automatique.</div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>Enseignant</label>
+        <select id="r-prof"></select>
+      </div>
+      <div class="form-row">
+        <label>Type</label>
+        <select id="r-type">
+          <option value="Atelier">Animation atelier (midi)</option>
+          <option value="Compétition">Compétition (mercredi extérieur)</option>
+          <option value="Préparation">Préparation / déplacement</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Jour de la semaine</label>
+        <select id="r-jour">
+          <option value="1">Lundi</option>
+          <option value="2">Mardi</option>
+          <option value="3">Mercredi</option>
+          <option value="4">Jeudi</option>
+          <option value="5">Vendredi</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Durée par séance (h)</label>
+        <input type="number" id="r-duree" min="0.5" max="6" step="0.5" placeholder="ex : 1.5">
+      </div>
+      <div class="form-row">
+        <label>Date de début</label>
+        <input type="date" id="r-debut">
+      </div>
+      <div class="form-row">
+        <label>Date de fin</label>
+        <input type="date" id="r-fin">
+      </div>
+      <div class="form-row full">
+        <label>Discipline / contexte</label>
+        <input type="text" id="r-contexte" placeholder="ex : Ping pong — Salle polyvalente">
+      </div>
+      <div class="form-row full">
+        <label>Dates à exclure (vacances, annulations) — séparées par des virgules</label>
+        <input type="text" id="r-exclusions" placeholder="ex : 2026-02-17, 2026-02-24">
+      </div>
+    </div>
+    <div id="r-preview" style="margin-top:14px;padding:12px 14px;background:var(--surface2);border-radius:8px;font-size:13px;color:var(--text-sec);display:none"></div>
+    <div class="form-actions">
+      <span class="success-msg" id="msg-recurrence">✓ Créneau enregistré</span>
+      <button class="btn-sec" onclick="previewRecurrence()">Prévisualiser</button>
+      <button class="btn-primary" onclick="ajouterRecurrence()">Enregistrer le créneau</button>
+    </div>
+  </div>
+  <div class="section-title">Créneaux actifs</div>
+  <div id="recurrence-list"></div>
+</div>
+
+<!-- PALMARES -->
+<div id="tab-palmarès" class="tab-content" style="display:none">
+  <div class="form-card" style="margin-bottom:1.5rem">
+    <div style="font-size:15px;font-weight:600;margin-bottom:14px;">Ajouter un résultat</div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>Enseignant accompagnateur</label>
+        <select id="p-prof"></select>
+      </div>
+      <div class="form-row">
+        <label>Date</label>
+        <input type="date" id="p-date">
+      </div>
+      <div class="form-row">
+        <label>Discipline sportive</label>
+        <input type="text" id="p-sport" placeholder="ex : Handball, Cross, Natation…">
+      </div>
+      <div class="form-row">
+        <label>Niveau / compétition</label>
+        <input type="text" id="p-niveau" placeholder="ex : District, Académique, National…">
+      </div>
+      <div class="form-row">
+        <label>Résultat obtenu</label>
+        <select id="p-result">
+          <option value="🥇 1re place">🥇 1re place</option>
+          <option value="🥈 2e place">🥈 2e place</option>
+          <option value="🥉 3e place">🥉 3e place</option>
+          <option value="🏅 Qualification">🏅 Qualification</option>
+          <option value="✅ Participation">✅ Participation</option>
+          <option value="Autre">Autre</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Élève(s) concerné(s)</label>
+        <input type="text" id="p-eleves" placeholder="ex : M. Dupont, L. Martin (5A)">
+      </div>
+      <div class="form-row full">
+        <label>Remarques</label>
+        <input type="text" id="p-note" placeholder="ex : Qualification pour le tour suivant">
+      </div>
+    </div>
+    <div class="form-actions">
+      <span class="success-msg" id="msg-palmares">✓ Résultat enregistré</span>
+      <button class="btn-primary" onclick="ajouterPalmares()">Enregistrer</button>
+    </div>
+  </div>
+  <div class="section-title">Palmarès de l'année</div>
+  <div id="palmares-list"></div>
+</div>
+
+<!-- HISTORIQUE -->
+<div id="tab-historique" class="tab-content" style="display:none">
+  <div class="filters">
+    <label>Prof :</label>
+    <select id="f-prof" onchange="renderHistorique()"></select>
+    <label>Trimestre :</label>
+    <select id="f-trim" onchange="renderHistorique()">
+      <option value="all">Tous</option>
+      <option value="1">T1</option>
+      <option value="2">T2</option>
+      <option value="3">T3</option>
+    </select>
+    <label>Type :</label>
+    <select id="f-type" onchange="renderHistorique()">
+      <option value="all">Tous</option>
+      <option value="Compétition">Compétition</option>
+      <option value="Atelier">Atelier</option>
+      <option value="Préparation">Préparation</option>
+    </select>
+  </div>
+  <div id="histo-content"></div>
+</div>
+
+<!-- EXPORT -->
+<div id="tab-export" class="tab-content" style="display:none">
+  <div class="export-section">
+    <div class="export-card">
+      <h3>Export CSV — Séances</h3>
+      <p>Toutes les séances au format tableur, pour alimenter votre prévisionnel Excel.</p>
+      <div class="btns"><button class="btn-primary" onclick="exportCSV('seances')">Télécharger CSV séances</button></div>
+    </div>
+    <div class="export-card">
+      <h3>Export CSV — Palmarès</h3>
+      <p>Liste de tous les résultats de compétitions enregistrés.</p>
+      <div class="btns"><button class="btn-primary" onclick="exportCSV('palmares')">Télécharger CSV palmarès</button></div>
+    </div>
+    <div class="export-card">
+      <h3>Récapitulatif trimestriel par enseignant</h3>
+      <p>Tableau synthèse : heures par prof, par trimestre, avec types.</p>
+      <div class="btns"><button class="btn-primary" onclick="exportCSV('recap')">Télécharger CSV récap</button></div>
+    </div>
+    <div class="export-card" style="border-color:#FECACA;">
+      <h3 style="color:#991B1B">⚠️ Réinitialiser les données</h3>
+      <p>Efface toutes les séances et palmarès. Irréversible.</p>
+      <div class="btns"><button class="btn-sec" style="color:#991B1B;border-color:#FECACA" onclick="resetAll()">Réinitialiser</button></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+// ── CONFIG ──
+const PROFS = ["Ruddy Rome", "Anne Caty", "Frédéric Bourrellier", "Charly Duroux", "David Alba"];
+const OBJECTIF = 108; // heures annuelles par prof
+const BIN_NAME = "as_saint_victor_2025";
+
+let API_KEY = localStorage.getItem('jsonbin_api_key') || '';
+let BIN_ID = localStorage.getItem('jsonbin_bin_id') || '';
+
+// ── LOGO INLINE ──
+document.getElementById('header-logo').src = 'data:image/png;base64,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';
+
+// ── DONNÉES ──
+let db = { seances: [], palmares: [], lastSync: null };
+
+// ── JSONBIN ──
+async function fetchDB() {
+  if (!API_KEY) return false;
+  try {
+    if (!BIN_ID) return await createBin();
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+      headers: { 'X-Master-Key': API_KEY }
+    });
+    if (!r.ok) return false;
+    const j = await r.json();
+    db = j.record;
+    if (!db.seances) db.seances = [];
+    if (!db.palmares) db.palmares = [];
+    if (!db.recurrences) db.recurrences = [];
+    setSyncOk();
+    return true;
+  } catch(e) { setSyncErr(); return false; }
+}
+
+async function saveDB() {
+  if (!API_KEY || !BIN_ID) return false;
+  db.lastSync = new Date().toISOString();
+  try {
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+      body: JSON.stringify(db)
+    });
+    if (!r.ok) { setSyncErr(); return false; }
+    setSyncOk(); return true;
+  } catch(e) { setSyncErr(); return false; }
+}
+
+async function createBin() {
+  try {
+    const r = await fetch('https://api.jsonbin.io/v3/b', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY, 'X-Bin-Name': BIN_NAME, 'X-Bin-Private': 'true' },
+      body: JSON.stringify({ seances: [], palmares: [], lastSync: null })
+    });
+    if (!r.ok) { setSyncErr(); return false; }
+    const j = await r.json();
+    BIN_ID = j.metadata.id;
+    localStorage.setItem('jsonbin_bin_id', BIN_ID);
+    setSyncOk();
+    alert('✅ Base de données créée ! ID : ' + BIN_ID + '\n\nPartagez cet ID avec vos collègues : ils devront le coller dans la configuration.');
+    return true;
+  } catch(e) { setSyncErr(); return false; }
+}
+
+function setSyncOk() {
+  const el = document.getElementById('sync-status');
+  el.textContent = '⬤ Synchronisé';
+  el.className = 'sync-badge sync-ok';
+}
+function setSyncErr() {
+  const el = document.getElementById('sync-status');
+  el.textContent = '⬤ Hors ligne';
+  el.className = 'sync-badge sync-err';
+}
+
+function saveApiKey() {
+  const k = document.getElementById('api-key-input').value.trim();
+  if (!k) return;
+  API_KEY = k;
+  localStorage.setItem('jsonbin_api_key', k);
+  const binInput = prompt('Avez-vous déjà un ID de bin à rejoindre ? (laissez vide pour créer une nouvelle base)');
+  if (binInput && binInput.trim()) {
+    BIN_ID = binInput.trim();
+    localStorage.setItem('jsonbin_bin_id', BIN_ID);
+  }
+  document.getElementById('setup-banner').style.display = 'none';
+  init();
+}
+
+// ── TRIMESTRE ──
+function getTrim(dateStr) {
+  if (!dateStr) return 1;
+  const m = new Date(dateStr).getMonth() + 1;
+  if (m >= 9) return 1;
+  if (m <= 3) return 2;
+  return 3;
+}
+
+// ── INIT ──
+async function init() {
+  if (API_KEY) {
+    document.getElementById('setup-banner').style.display = 'none';
+    document.getElementById('api-key-input').value = API_KEY;
+  }
+  await fetchDB();
+  populateSelects();
+  renderDashboard();
+  renderPalmares();
+  renderHistorique();
+}
+
+function populateSelects() {
+  ['s-prof','p-prof'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = '';
+    PROFS.forEach(p => { const o = new Option(p, p); el.appendChild(o); });
+  });
+  ['f-prof'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = '<option value="all">Tous</option>';
+    PROFS.forEach(p => { const o = new Option(p, p); el.appendChild(o); });
+  });
+  const today = new Date().toISOString().split('T')[0];
+  ['s-date','p-date'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.value) el.value = today;
+  });
+}
+
+// ── DASHBOARD ──
+function renderDashboard() {
+  if (!db.recurrences) db.recurrences = [];
+
+  const totalPonct = db.seances.reduce((a,s) => a + parseFloat(s.duree||0), 0);
+  const totalRec = PROFS.reduce((a, p) => a + heuresRecurrences(p), 0);
+  const totalH = totalPonct + totalRec;
+  const totalObj = OBJECTIF * PROFS.length;
+  const pctGlobal = totalObj > 0 ? Math.min(100, Math.round(totalH / totalObj * 100)) : 0;
+  const palCount = db.palmares.length;
+  const podiums = db.palmares.filter(p => ['🥇 1re place','🥈 2e place','🥉 3e place'].includes(p.result)).length;
+  const nbCreneaux = db.recurrences.length;
+
+  document.getElementById('dash-cards').innerHTML = `
+    <div class="card highlight">
+      <div class="label">Heures AS totales</div>
+      <div class="value">${totalH.toFixed(1)}h</div>
+      <div class="sub">sur ${totalObj}h objectif collectif</div>
+    </div>
+    <div class="card">
+      <div class="label">Avancement global</div>
+      <div class="value">${pctGlobal}%</div>
+      <div class="sub">${db.seances.length} ponctuelles · ${nbCreneaux} créneau${nbCreneaux>1?'x':''} récurrent${nbCreneaux>1?'s':''}</div>
+    </div>
+    <div class="card">
+      <div class="label">Compétitions</div>
+      <div class="value">${palCount}</div>
+      <div class="sub">${podiums} podium${podiums > 1 ? 's' : ''}</div>
+    </div>
+    <div class="card">
+      <div class="label">Objectif / prof</div>
+      <div class="value">${OBJECTIF}h</div>
+      <div class="sub">3h × 36 sem. = 108h</div>
+    </div>
+  `;
+
+  // Barres par prof (ponctuel + récurrent)
+  let html = `<div class="prof-row head"><span>Enseignant</span><span>Progression annuelle</span><span style="text-align:right">Heures</span><span style="text-align:right">Statut</span></div>`;
+  PROFS.forEach(prof => {
+    const hPonct = db.seances.filter(s => s.prof === prof).reduce((a,s) => a + parseFloat(s.duree||0), 0);
+    const hRec = heuresRecurrences(prof);
+    const h = hPonct + hRec;
+    const pct = Math.min(100, Math.round(h / OBJECTIF * 100));
+    const color = pct >= 80 ? '#16A34A' : pct >= 40 ? '#D97706' : '#1B3A8C';
+    const tagClass = pct >= 80 ? 'tag-ok' : pct >= 40 ? 'tag-warn' : 'tag-low';
+    const tagText = pct >= 80 ? 'En bonne voie' : pct >= 40 ? 'À suivre' : 'Insuffisant';
+    const recLabel = hRec > 0 ? ` <span style="font-size:11px;color:var(--text-muted)">(dont ${hRec.toFixed(1)}h récurrents)</span>` : '';
+    html += `<div class="prof-row">
+      <span class="prof-name">${prof}</span>
+      <div class="bar-wrap">
+        <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
+        <span class="bar-pct">${pct}%</span>
+      </div>
+      <span class="bar-h">${h.toFixed(1)} / ${OBJECTIF}h${recLabel}</span>
+      <span style="text-align:right"><span class="tag ${tagClass}">${tagText}</span></span>
+    </div>`;
+  });
+  document.getElementById('dash-profs').innerHTML = html;
+
+  // Par trimestre (ponctuel + récurrent)
+  const trims = [1,2,3];
+  let trimHtml = '';
+  trims.forEach(t => {
+    const hPonct = db.seances.filter(s => getTrim(s.date) === t).reduce((a,s) => a + parseFloat(s.duree||0), 0);
+    const hRec = PROFS.reduce((a, p) => a + heuresRecurrencesTrim(p, t), 0);
+    const h = hPonct + hRec;
+    const n = db.seances.filter(s => getTrim(s.date) === t).length;
+    trimHtml += `<div class="card"><div class="label">Trimestre ${t}</div><div class="value">${h.toFixed(1)}h</div><div class="sub">${n} ponctuelle${n>1?'s':''} + récurrents</div></div>`;
+  });
+  document.getElementById('dash-trim').innerHTML = trimHtml;
+}
+
+// ── SAISIE ──
+async function ajouterSeance() {
+  const prof = document.getElementById('s-prof').value;
+  const type = document.getElementById('s-type').value;
+  const date = document.getElementById('s-date').value;
+  const dureeRaw = parseFloat(document.getElementById('s-duree').value);
+  const contexte = document.getElementById('s-contexte').value.trim();
+  const note = document.getElementById('s-note').value.trim();
+  const errEl = document.getElementById('err-duree');
+
+  if (!date || isNaN(dureeRaw) || dureeRaw <= 0 || dureeRaw > 12) {
+    errEl.style.display = 'block'; return;
+  }
+  errEl.style.display = 'none';
+
+  db.seances.push({ id: Date.now(), prof, type, date, duree: dureeRaw.toFixed(1), contexte, note, trim: getTrim(date) });
+  const ok = await saveDB();
+
+  if (ok) {
+    resetSaisie();
+    const msg = document.getElementById('msg-saisie');
+    msg.style.display = 'inline-block';
+    setTimeout(() => msg.style.display = 'none', 2500);
+    renderDashboard();
+    renderHistorique();
+  }
+}
+
+function resetSaisie() {
+  ['s-duree','s-contexte','s-note'].forEach(id => document.getElementById(id).value = '');
+}
+
+// ── PALMARES ──
+async function ajouterPalmares() {
+  const prof = document.getElementById('p-prof').value;
+  const date = document.getElementById('p-date').value;
+  const sport = document.getElementById('p-sport').value.trim();
+  const niveau = document.getElementById('p-niveau').value.trim();
+  const result = document.getElementById('p-result').value;
+  const eleves = document.getElementById('p-eleves').value.trim();
+  const note = document.getElementById('p-note').value.trim();
+
+  if (!sport || !date) { alert('Discipline et date requises'); return; }
+
+  db.palmares.push({ id: Date.now(), prof, date, sport, niveau, result, eleves, note });
+  const ok = await saveDB();
+  if (ok) {
+    ['p-sport','p-niveau','p-eleves','p-note'].forEach(id => document.getElementById(id).value = '');
+    const msg = document.getElementById('msg-palmares');
+    msg.style.display = 'inline-block';
+    setTimeout(() => msg.style.display = 'none', 2500);
+    renderPalmares();
+    renderDashboard();
+  }
+}
+
+function renderPalmares() {
+  const list = [...db.palmares].sort((a,b) => b.date.localeCompare(a.date));
+  if (list.length === 0) {
+    document.getElementById('palmares-list').innerHTML = '<div class="empty">Aucun résultat enregistré pour l\'instant.</div>';
+    return;
+  }
+  let html = '<div class="podium-grid">';
+  list.forEach(p => {
+    html += `<div class="podium-card">
+      <div class="sport">${p.sport}${p.niveau ? ' · ' + p.niveau : ''}</div>
+      <div class="result">${p.result}</div>
+      <div class="meta">${p.date} · ${p.prof}</div>
+      ${p.eleves ? '<div class="meta" style="margin-top:4px">👤 ' + p.eleves + '</div>' : ''}
+      ${p.note ? '<div class="meta" style="margin-top:4px;font-style:italic">' + p.note + '</div>' : ''}
+    </div>`;
+  });
+  html += '</div>';
+  document.getElementById('palmares-list').innerHTML = html;
+}
+
+// ── HISTORIQUE ──
+function renderHistorique() {
+  const fp = document.getElementById('f-prof') ? document.getElementById('f-prof').value : 'all';
+  const ft = document.getElementById('f-trim') ? document.getElementById('f-trim').value : 'all';
+  const ftp = document.getElementById('f-type') ? document.getElementById('f-type').value : 'all';
+
+  let rows = db.seances.filter(s =>
+    (fp === 'all' || s.prof === fp) &&
+    (ft === 'all' || getTrim(s.date) === parseInt(ft)) &&
+    (ftp === 'all' || s.type === ftp)
+  ).sort((a,b) => b.date.localeCompare(a.date));
+
+  if (rows.length === 0) {
+    document.getElementById('histo-content').innerHTML = '<div class="empty">Aucune séance pour ces filtres.</div>';
+    return;
+  }
+
+  const typeColors = { 'Compétition': '#1B3A8C', 'Atelier': '#166534', 'Préparation': '#92400E' };
+  const typeBg = { 'Compétition': '#EEF2FA', 'Atelier': '#DCFCE7', 'Préparation': '#FEF3C7' };
+
+  let html = `<table class="data-table"><thead><tr>
+    <th>Date</th><th>Prof</th><th>Type</th><th>Durée</th><th>Trim.</th><th>Contexte</th><th>Note</th><th></th>
+  </tr></thead><tbody>`;
+
+  rows.forEach(s => {
+    const idx = db.seances.findIndex(x => x.id === s.id);
+    html += `<tr>
+      <td>${s.date}</td>
+      <td>${s.prof}</td>
+      <td><span style="background:${typeBg[s.type]||'#EEF2FA'};color:${typeColors[s.type]||'#1B3A8C'};padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">${s.type}</span></td>
+      <td><strong>${parseFloat(s.duree).toFixed(1)}h</strong></td>
+      <td><span class="badge-trim">T${getTrim(s.date)}</span></td>
+      <td style="color:var(--text-sec);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.contexte || '—'}</td>
+      <td style="color:var(--text-muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.note || '—'}</td>
+      <td><button class="btn-del" onclick="supprimerSeance(${idx})">×</button></td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('histo-content').innerHTML = html;
+}
+
+async function supprimerSeance(idx) {
+  if (!confirm('Supprimer cette séance ?')) return;
+  db.seances.splice(idx, 1);
+  await saveDB();
+  renderHistorique();
+  renderDashboard();
+}
+
+// ── EXPORT ──
+function exportCSV(type) {
+  let csv = '', filename = '';
+  if (type === 'seances') {
+    csv = 'Enseignant,Type,Date,Durée (h),Trimestre,Contexte,Note\n';
+    db.seances.forEach(s => {
+      csv += `"${s.prof}","${s.type}","${s.date}","${s.duree}","T${getTrim(s.date)}","${s.contexte||''}","${s.note||''}"\n`;
+    });
+    filename = 'AS_saint_victor_seances.csv';
+  } else if (type === 'palmares') {
+    csv = 'Enseignant,Date,Discipline,Niveau,Résultat,Élèves,Remarques\n';
+    db.palmares.forEach(p => {
+      csv += `"${p.prof}","${p.date}","${p.sport}","${p.niveau||''}","${p.result}","${p.eleves||''}","${p.note||''}"\n`;
+    });
+    filename = 'AS_saint_victor_palmares.csv';
+  } else {
+    csv = 'Enseignant,T1 ponctuel (h),T1 récurrent (h),T2 ponctuel (h),T2 récurrent (h),T3 ponctuel (h),T3 récurrent (h),Total (h),Objectif (h),Avancement\n';
+    PROFS.forEach(prof => {
+      const s = db.seances.filter(x => x.prof === prof);
+      const p1 = s.filter(x => getTrim(x.date)===1).reduce((a,x)=>a+parseFloat(x.duree||0),0);
+      const p2 = s.filter(x => getTrim(x.date)===2).reduce((a,x)=>a+parseFloat(x.duree||0),0);
+      const p3 = s.filter(x => getTrim(x.date)===3).reduce((a,x)=>a+parseFloat(x.duree||0),0);
+      const r1 = heuresRecurrencesTrim(prof,1);
+      const r2 = heuresRecurrencesTrim(prof,2);
+      const r3 = heuresRecurrencesTrim(prof,3);
+      const tot = p1+p2+p3+r1+r2+r3;
+      csv += `"${prof}","${p1.toFixed(1)}","${r1.toFixed(1)}","${p2.toFixed(1)}","${r2.toFixed(1)}","${p3.toFixed(1)}","${r3.toFixed(1)}","${tot.toFixed(1)}","${OBJECTIF}","${Math.round(tot/OBJECTIF*100)}%"\n`;
+    });
+    filename = 'AS_saint_victor_recap.csv';
+  }
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent('\uFEFF' + csv);
+  a.download = filename;
+  a.click();
+}
+
+async function resetAll() {
+  if (!confirm('Effacer TOUTES les séances et résultats ? Irréversible.')) return;
+  db = { seances: [], palmares: [], recurrences: [], lastSync: null };
+  await saveDB();
+  renderDashboard();
+  renderPalmares();
+  renderHistorique();
+}
+
+// ── TABS ──
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.nav button').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).style.display = 'block';
+  const icons = { dashboard:'📊', saisie:'➕', recurrence:'🔁', 'palmarès':'🏆', historique:'📋', export:'📤' };
+  [...document.querySelectorAll('.nav button')].find(b => b.textContent.includes(icons[name]))?.classList.add('active');
+  if (name === 'saisie') populateSelects();
+  if (name === 'recurrence') { populateRecurrenceSelects(); renderRecurrenceList(); }
+  if (name === 'historique') { populateFilters(); renderHistorique(); }
+  if (name === 'palmarès') { populateSelects(); renderPalmares(); }
+}
+
+function populateRecurrenceSelects() {
+  const el = document.getElementById('r-prof');
+  if (!el || el.options.length > 0) return;
+  PROFS.forEach(p => { const o = new Option(p,p); el.appendChild(o); });
+  const today = new Date().toISOString().split('T')[0];
+  if (!document.getElementById('r-debut').value) document.getElementById('r-debut').value = today;
+}
+
+function populateFilters() {
+  const el = document.getElementById('f-prof');
+  if (el && el.options.length <= 1) {
+    PROFS.forEach(p => { const o = new Option(p,p); el.appendChild(o); });
+  }
+}
+
+// ── RÉCURRENCE ──
+
+const JOURS = ['','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+
+function getDatesRecurrence(jourSem, debut, fin, exclusions) {
+  const dates = [];
+  const d = new Date(debut);
+  const f = new Date(fin);
+  const excl = exclusions.map(e => e.trim()).filter(Boolean);
+  // Avancer jusqu'au bon jour
+  while (d.getDay() !== parseInt(jourSem)) d.setDate(d.getDate() + 1);
+  while (d <= f) {
+    const ds = d.toISOString().split('T')[0];
+    if (!excl.includes(ds)) dates.push(ds);
+    d.setDate(d.getDate() + 7);
+  }
+  return dates;
+}
+
+function previewRecurrence() {
+  const jourSem = document.getElementById('r-jour').value;
+  const duree = parseFloat(document.getElementById('r-duree').value);
+  const debut = document.getElementById('r-debut').value;
+  const fin = document.getElementById('r-fin').value;
+  const exclRaw = document.getElementById('r-exclusions').value.split(',');
+  const prev = document.getElementById('r-preview');
+
+  if (!debut || !fin || isNaN(duree) || duree <= 0) {
+    prev.style.display = 'block';
+    prev.innerHTML = '⚠️ Renseignez le jour, la durée, et les dates de début/fin.';
+    return;
+  }
+  if (new Date(fin) <= new Date(debut)) {
+    prev.style.display = 'block';
+    prev.innerHTML = '⚠️ La date de fin doit être après la date de début.';
+    return;
+  }
+
+  const dates = getDatesRecurrence(jourSem, debut, fin, exclRaw);
+  const totalH = (dates.length * duree).toFixed(1);
+  prev.style.display = 'block';
+  prev.innerHTML = `<strong>${dates.length} séances</strong> générées → <strong>${totalH}h</strong> au compteur.<br>
+    <span style="color:var(--text-muted)">${dates.slice(0,5).join(', ')}${dates.length > 5 ? ' … (et ' + (dates.length-5) + ' autres)' : ''}</span>`;
+}
+
+async function ajouterRecurrence() {
+  const prof = document.getElementById('r-prof').value;
+  const type = document.getElementById('r-type').value;
+  const jourSem = document.getElementById('r-jour').value;
+  const duree = parseFloat(document.getElementById('r-duree').value);
+  const debut = document.getElementById('r-debut').value;
+  const fin = document.getElementById('r-fin').value;
+  const contexte = document.getElementById('r-contexte').value.trim();
+  const exclRaw = document.getElementById('r-exclusions').value.split(',');
+
+  if (!debut || !fin || isNaN(duree) || duree <= 0 || new Date(fin) <= new Date(debut)) {
+    alert('Vérifiez les champs : durée, dates de début et fin.'); return;
+  }
+
+  const exclusions = exclRaw.map(e => e.trim()).filter(Boolean);
+  const rec = { id: Date.now(), prof, type, jourSem, duree: duree.toFixed(1), debut, fin, contexte, exclusions };
+
+  if (!db.recurrences) db.recurrences = [];
+  db.recurrences.push(rec);
+  const ok = await saveDB();
+  if (ok) {
+    ['r-contexte','r-exclusions','r-duree','r-debut','r-fin'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('r-preview').style.display = 'none';
+    const msg = document.getElementById('msg-recurrence');
+    msg.style.display = 'inline-block';
+    setTimeout(() => msg.style.display = 'none', 2500);
+    renderRecurrenceList();
+    renderDashboard();
+  }
+}
+
+async function supprimerRecurrence(idx) {
+  if (!confirm('Supprimer ce créneau récurrent ?')) return;
+  db.recurrences.splice(idx, 1);
+  await saveDB();
+  renderRecurrenceList();
+  renderDashboard();
+}
+
+function renderRecurrenceList() {
+  if (!db.recurrences) db.recurrences = [];
+  const el = document.getElementById('recurrence-list');
+  if (!el) return;
+  if (db.recurrences.length === 0) {
+    el.innerHTML = '<div class="empty">Aucun créneau récurrent configuré.</div>'; return;
+  }
+  let html = `<table class="data-table"><thead><tr>
+    <th>Enseignant</th><th>Type</th><th>Jour</th><th>Durée/séance</th><th>Période</th><th>Séances</th><th>Total</th><th>Contexte</th><th></th>
+  </tr></thead><tbody>`;
+  db.recurrences.forEach((r, idx) => {
+    const dates = getDatesRecurrence(r.jourSem, r.debut, r.fin, r.exclusions || []);
+    const totalH = (dates.length * parseFloat(r.duree)).toFixed(1);
+    const typeColors = { 'Compétition': '#1B3A8C', 'Atelier': '#166534', 'Préparation': '#92400E' };
+    const typeBg = { 'Compétition': '#EEF2FA', 'Atelier': '#DCFCE7', 'Préparation': '#FEF3C7' };
+    html += `<tr>
+      <td><strong>${r.prof}</strong></td>
+      <td><span style="background:${typeBg[r.type]||'#EEF2FA'};color:${typeColors[r.type]||'#1B3A8C'};padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">${r.type}</span></td>
+      <td>${JOURS[r.jourSem]}</td>
+      <td>${r.duree}h</td>
+      <td style="font-size:12px;color:var(--text-sec)">${r.debut} → ${r.fin}</td>
+      <td style="text-align:center"><strong>${dates.length}</strong></td>
+      <td><strong style="color:var(--sv-blue)">${totalH}h</strong></td>
+      <td style="font-size:12px;color:var(--text-sec)">${r.contexte||'—'}</td>
+      <td><button class="btn-del" onclick="supprimerRecurrence(${idx})">×</button></td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+// Calcule les heures issues des récurrences pour un prof
+function heuresRecurrences(prof) {
+  if (!db.recurrences) return 0;
+  return db.recurrences
+    .filter(r => r.prof === prof)
+    .reduce((acc, r) => {
+      const dates = getDatesRecurrence(r.jourSem, r.debut, r.fin, r.exclusions || []);
+      return acc + dates.length * parseFloat(r.duree);
+    }, 0);
+}
+
+// Heures récurrences pour un trimestre
+function heuresRecurrencesTrim(prof, trim) {
+  if (!db.recurrences) return 0;
+  return db.recurrences
+    .filter(r => r.prof === prof)
+    .reduce((acc, r) => {
+      const dates = getDatesRecurrence(r.jourSem, r.debut, r.fin, r.exclusions || []);
+      const filtered = dates.filter(d => getTrim(d) === trim);
+      return acc + filtered.length * parseFloat(r.duree);
+    }, 0);
+}
+
+// ── START ──
+init();
+
+// Rafraîchit toutes les 60s si on est sur le dashboard
+setInterval(async () => {
+  const dash = document.getElementById('tab-dashboard');
+  if (dash && dash.style.display !== 'none') {
+    await fetchDB();
+    renderDashboard();
+  }
+}, 60000);
+</script>
+</body>
+</html>
