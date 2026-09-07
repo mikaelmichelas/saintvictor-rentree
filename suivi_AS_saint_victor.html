@@ -258,7 +258,7 @@ textarea { resize: vertical; min-height: 60px; }
         <label>Discipline</label>
         <select id="r-sport">
           <option value="Tennis de table">Tennis de table</option>
-          <option value="Musculation">Musculation</option>
+          <option value="Handball">Handball</option>
           <option value="Danse">Danse</option>
           <option value="Futsal">Futsal</option>
         </select>
@@ -281,13 +281,13 @@ textarea { resize: vertical; min-height: 60px; }
         <label>Trimestres concernés</label>
         <div style="display:flex;gap:20px;margin-top:6px;flex-wrap:wrap">
           <label style="display:flex;align-items:center;gap:6px;font-size:14px;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer">
-            <input type="checkbox" id="r-t1" value="1" style="width:auto"> T1 — 1 sept → 27 nov 2025
+            <input type="checkbox" id="r-t1" value="1" style="width:auto"> T1 — 1 sept → 27 nov 2026
           </label>
           <label style="display:flex;align-items:center;gap:6px;font-size:14px;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer">
-            <input type="checkbox" id="r-t2" value="2" style="width:auto"> T2 — 30 nov 2025 → 12 mars 2026
+            <input type="checkbox" id="r-t2" value="2" style="width:auto"> T2 — 30 nov 2026 → 12 mars 2027
           </label>
           <label style="display:flex;align-items:center;gap:6px;font-size:14px;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer">
-            <input type="checkbox" id="r-t3" value="3" style="width:auto"> T3 — 15 mars → 18 juin 2026
+            <input type="checkbox" id="r-t3" value="3" style="width:auto"> T3 — 15 mars → 18 juin 2027
           </label>
         </div>
         <div class="err-msg" id="err-trim" style="display:none">Sélectionnez au moins un trimestre.</div>
@@ -323,7 +323,7 @@ textarea { resize: vertical; min-height: 60px; }
       </div>
       <div class="form-row">
         <label>Discipline sportive</label>
-        <input type="text" id="p-sport" placeholder="ex : Tennis de table, Cross, Natation…">
+        <input type="text" id="p-sport" placeholder="ex : Handball, Cross, Natation…">
       </div>
       <div class="form-row">
         <label>Niveau / compétition</label>
@@ -813,17 +813,45 @@ function populateFilters() {
 
 const JOURS = ['','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 
-// Bornes officielles des trimestres (année scolaire 2025-2026)
+// Bornes officielles des trimestres (année scolaire 2026-2027)
 const TRIM_BORNES = {
-  1: { debut: '2025-09-01', fin: '2025-11-27' },
-  2: { debut: '2025-11-30', fin: '2026-03-12' },
-  3: { debut: '2026-03-15', fin: '2026-06-18' }
+  1: { debut: '2026-09-01', fin: '2026-11-27' },
+  2: { debut: '2026-11-30', fin: '2027-03-12' },
+  3: { debut: '2027-03-15', fin: '2027-06-18' }
 };
 const TRIM_LABELS = {
-  1: 'T1 — 1 sept → 27 nov 2025',
-  2: 'T2 — 30 nov 2025 → 12 mars 2026',
-  3: 'T3 — 15 mars → 18 juin 2026'
+  1: 'T1 — 1 sept → 27 nov 2026',
+  2: 'T2 — 30 nov 2026 → 12 mars 2027',
+  3: 'T3 — 15 mars → 18 juin 2027'
 };
+
+// Vacances scolaires Zone A 2026-2027 (automatiquement exclues)
+const VACANCES_ZONE_A = [
+  { debut: '2026-10-17', fin: '2026-11-02' }, // Toussaint
+  { debut: '2026-12-19', fin: '2027-01-04' }, // Noël
+  { debut: '2027-02-13', fin: '2027-03-01' }, // Hiver
+  { debut: '2027-04-10', fin: '2027-04-26' }, // Printemps
+  { debut: '2027-05-05', fin: '2027-05-10' }, // Ascension
+];
+const JOURS_FERIES_AN = [
+  '2026-11-11','2026-12-25','2027-01-01','2027-03-29',
+  '2027-05-01','2027-05-06','2027-05-17'
+];
+
+// Dates spécifiques Saint Victor à exclure
+const EXCLUSIONS_ETABLISSEMENT = [
+  '2026-10-16', // Journée pédagogique
+  '2026-12-18', // Repas de Noël (créneau AS midi)
+];
+
+function isVacanceOuFerie(dateStr) {
+  if (JOURS_FERIES_AN.includes(dateStr)) return true;
+  if (EXCLUSIONS_ETABLISSEMENT.includes(dateStr)) return true;
+  const d = new Date(dateStr + 'T12:00:00');
+  return VACANCES_ZONE_A.some(v =>
+    d >= new Date(v.debut + 'T12:00:00') && d <= new Date(v.fin + 'T12:00:00')
+  );
+}
 
 function getDatesInPeriod(jourSem, debut, fin, exclusions) {
   const dates = [];
@@ -833,7 +861,7 @@ function getDatesInPeriod(jourSem, debut, fin, exclusions) {
   while (d.getDay() !== parseInt(jourSem)) d.setDate(d.getDate() + 1);
   while (d <= f) {
     const ds = d.toISOString().split('T')[0];
-    if (!excl.includes(ds)) dates.push(ds);
+    if (!excl.includes(ds) && !isVacanceOuFerie(ds)) dates.push(ds);
     d.setDate(d.getDate() + 7);
   }
   return dates;
