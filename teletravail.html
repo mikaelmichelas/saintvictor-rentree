@@ -180,8 +180,8 @@ td.tag{font-size:11px}
   <div class="situation-encart">
     <div class="sit-item">
       <div class="sit-label">Quota télétravail restant</div>
-      <div class="sit-val" id="sit-reste">369h15</div>
-      <div class="sit-sub" id="sit-reste-sub">sur 369h15 au total</div>
+      <div class="sit-val" id="sit-reste">377h15</div>
+      <div class="sit-sub" id="sit-reste-sub">sur 377h15 au total</div>
     </div>
     <div class="sit-sep"></div>
     <div class="sit-item">
@@ -221,7 +221,7 @@ td.tag{font-size:11px}
     </div>
     <div class="sc">
       <div class="sl">Restant à faire (télétravail)</div>
-      <div class="sv" id="s-rest" style="color:var(--blue)">369h15</div>
+      <div class="sv" id="s-rest" style="color:var(--blue)">377h15</div>
       <div class="ss" id="s-rest-sem">sur 41,5 semaines</div>
     </div>
     <div class="sc" style="border-color:#c8d8f0;background:#eef4fc">
@@ -330,7 +330,7 @@ td.tag{font-size:11px}
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
         <div style="text-align:center;padding:14px;background:rgba(255,255,255,.6);border-radius:8px">
           <div class="cpt-label">Quota télétravail annuel</div>
-          <div class="cpt-val blue" id="b-quota">369h15</div>
+          <div class="cpt-val blue" id="b-quota">377h15</div>
           <div class="cpt-sub">à couvrir en télétravail</div>
         </div>
         <div style="text-align:center;padding:14px;background:rgba(255,255,255,.6);border-radius:8px">
@@ -340,8 +340,8 @@ td.tag{font-size:11px}
         </div>
         <div style="text-align:center;padding:14px;background:rgba(255,255,255,.6);border-radius:8px">
           <div class="cpt-label">Restant à couvrir</div>
-          <div class="cpt-val" id="b-reste" style="color:var(--blue)">369h15</div>
-          <div class="cpt-sub" id="b-reste-sem">≈ 8h54 / semaine</div>
+          <div class="cpt-val" id="b-reste" style="color:var(--blue)">377h15</div>
+          <div class="cpt-sub" id="b-reste-sem">≈ 9h05 / semaine</div>
         </div>
       </div>
       <div>
@@ -414,11 +414,15 @@ td.tag{font-size:11px}
     <table class="btable">
       <thead><tr><th>Nature</th><th>Détail</th><th>Total</th></tr></thead>
       <tbody>
-        <tr><td>Samedis travaillés</td><td>2 samedis dans l'année</td><td class="bv">16h</td></tr>
-        <tr><td>Vendredis travaillés (ponctuel)</td><td>3 vendredis identifiés</td><td class="bv">22h</td></tr>
-        <tr><td>Mercredis sur place</td><td>4 mercredis en présentiel</td><td class="bv">12h</td></tr>
-        <tr><td>Soirées prolongées</td><td>3 soirées × 2h30 (dépassement après 17h)</td><td class="bv">7,5h</td></tr>
-        <tr class="btotal"><td colspan="2">Sous-total heures hors semaine type</td><td class="bv">57,5h</td></tr>
+        <tr><td>Samedi Portes Ouvertes lycée</td><td>Journée portes ouvertes établissement</td><td class="bv">8h</td></tr>
+        <tr><td>Samedi Forum enseignement catholique</td><td>Forum annuel enseignement catholique</td><td class="bv">8h</td></tr>
+        <tr><td>Vendredi veille Portes Ouvertes</td><td>Préparation / organisation J-1</td><td class="bv">7h</td></tr>
+        <tr><td>Vendredi dernier jour des Terminales</td><td>Fin d'année Terminales — bal de promo</td><td class="bv">7h</td></tr>
+        <tr><td>Mercredis conseils de classe</td><td>4 mercredis en présentiel (conseils de classe)</td><td class="bv">12h</td></tr>
+        <tr><td>Soirée réunion rentrée 1ères</td><td>Réunion parents — niveau 1ères (dépassement 17h→19h30)</td><td class="bv">2,5h</td></tr>
+        <tr><td>Soirée réunion rentrée Terminales</td><td>Réunion parents — niveau Terminales (dépassement 17h→19h30)</td><td class="bv">2,5h</td></tr>
+        <tr><td>Soirée réunion parents-professeurs 2ndes</td><td>Réunion parents-profs — niveau 2ndes (dépassement 17h→19h30)</td><td class="bv">2,5h</td></tr>
+        <tr class="btotal"><td colspan="2">Sous-total heures hors semaine type</td><td class="bv">49,5h</td></tr>
       </tbody>
     </table>
     <p class="bnote">Ces heures sont incluses dans le calcul de base. Les dépassements et heures supplémentaires saisis dans l'onglet Suivi viennent s'y ajouter et réduisent d'autant le quota télétravail restant.</p>
@@ -432,13 +436,13 @@ td.tag{font-size:11px}
       <tbody>
         <tr><td>Quota annuel 75 %</td><td></td><td class="bv">1 173h45</td></tr>
         <tr><td>Présentiel lundi/mardi/jeudi</td><td>6h × 3j × 41,5 sem.</td><td class="bv red">− 747h</td></tr>
-        <tr><td>Heures hors semaine type (fixes)</td><td>samedis, vendredis, mercredis, soirées</td><td class="bv red">− 57,5h</td></tr>
+        <tr><td>Heures hors semaine type (fixes)</td><td>samedis, vendredis, mercredis, soirées</td><td class="bv red">− 49,5h</td></tr>
         <tr><td>Télétravail saisi</td><td>onglet Suivi</td><td class="bv red" id="b5-tt">− 0h</td></tr>
         <tr><td>Dépassements saisis</td><td>soirées prolongées saisies</td><td class="bv red" id="b5-dep">− 0h</td></tr>
         <tr><td>Heures supplémentaires saisies</td><td>journées atypiques saisies</td><td class="bv red" id="b5-sup">− 0h</td></tr>
-        <tr class="btotal"><td colspan="2"><strong>Télétravail restant à couvrir</strong></td><td class="bv" id="b5-reste">369h15</td></tr>
-        <tr><td colspan="2">Réparti sur les semaines restantes</td><td class="bv" id="b5-sem">≈ 8h54 / sem.</td></tr>
-        <tr><td colspan="2">Exemple : mercredi + vendredi à parts égales</td><td class="bv" id="b5-ex">≈ 4h27 / jour</td></tr>
+        <tr class="btotal"><td colspan="2"><strong>Télétravail restant à couvrir</strong></td><td class="bv" id="b5-reste">377h15</td></tr>
+        <tr><td colspan="2">Réparti sur les semaines restantes</td><td class="bv" id="b5-sem">≈ 9h05 / sem.</td></tr>
+        <tr><td colspan="2">Exemple : mercredi + vendredi à parts égales</td><td class="bv" id="b5-ex">≈ 4h33 / jour</td></tr>
       </tbody>
     </table>
     <p class="bnote">Le restant se met à jour à chaque saisie. Les heures déjà connues (bloc 4) sont déduites dans la base de calcul — seules les nouvelles saisies apparaissent ici.</p>
@@ -460,8 +464,8 @@ const KEY='teletravail_sv_v2';
 // Constantes contractuelles
 const QUOTA_TOTAL = 1173.75;   // heures annuelles à 75%
 const BASE_PRESENTIEL = 747;   // lun/mar/jeu
-const BASE_HORS = 57.5;        // samedis, vendredis, mercredis, soirées connues
-const QUOTA_TT = QUOTA_TOTAL - BASE_PRESENTIEL - BASE_HORS; // 369.25h
+const BASE_HORS = 49.5;        // samedis, vendredis, mercredis, soirées connues
+const QUOTA_TT = QUOTA_TOTAL - BASE_PRESENTIEL - BASE_HORS; // 377.25h
 const SEMAINES_ANNEE = 41.5;   // total annuel (référence fixe pour la base de calcul)
 
 // Date de fin d'année scolaire (dernier jour travaillé)
